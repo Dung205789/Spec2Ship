@@ -1,5 +1,4 @@
-# Spec2Ship v3 — AI Agentic Code Delivery Platform
-_Automate software ticket delivery with human-approved patches and full traceable artifacts._
+# Spec2Ship — AI Agentic Code Delivery Platform
 
 ## Intro
 Spec2Ship v3 is an AI-assisted software delivery workflow for engineering teams. It helps you upload a real codebase, analyze issues, generate a plan, propose patches, wait for human approval, run verification, and export both reports and the modified source code. The project is designed for auditability, reproducibility, and practical DevOps usage.
