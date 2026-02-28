@@ -24,6 +24,8 @@ flowchart LR
   D -->|Yes| E[Apply + verify]
   E --> F[Report + download bundle]
 ```
+This is a screenshot of the workflow
+<img width="1291" height="813" alt="image" src="https://github.com/user-attachments/assets/714a86d7-175e-48fb-a974-f01e1255b2a3" />
 
 ## Installation instructions for users
 ```bash
