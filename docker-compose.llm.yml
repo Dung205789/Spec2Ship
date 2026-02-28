@@ -1,0 +1,36 @@
+# Optional override: add Ollama and enable the LLM patcher.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.llm.yml up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.llm.yml exec ollama ollama pull qwen2.5-coder:7b
+#
+# Then run the normal UI flow. Backend will use Ollama to propose patches.
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  api:
+    environment:
+      PATCHER_MODE: "ollama"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "qwen2.5-coder:7b"
+      OLLAMA_TEMPERATURE: "0.2"
+      OLLAMA_NUM_CTX: "8192"
+      OLLAMA_TIMEOUT_SECONDS: "1800"
+
+  worker:
+    environment:
+      PATCHER_MODE: "ollama"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "qwen2.5-coder:7b"
+      OLLAMA_TEMPERATURE: "0.2"
+      OLLAMA_NUM_CTX: "8192"
+      OLLAMA_TIMEOUT_SECONDS: "1800"
+
+volumes:
+  ollama:

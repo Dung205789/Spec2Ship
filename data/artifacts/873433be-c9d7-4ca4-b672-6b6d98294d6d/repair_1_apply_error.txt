@@ -1,0 +1,1 @@
+FileNotFoundError: [Errno 2] No such file or directory: '/data/run_workspaces/873433be-c9d7-4ca4-b672-6b6d98294d6d/tinyshop/pricing.py'

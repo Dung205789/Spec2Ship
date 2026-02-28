@@ -1,0 +1,56 @@
+# ============================================================
+# Spec2Ship — Development override
+# Mount source code live so changes hot-reload without rebuild.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# With Ollama:
+#   docker compose -f docker-compose.yml -f docker-compose.llm.yml -f docker-compose.dev.yml up -d
+#
+# What this does:
+#   • web:    mounts ./web/app → /web/app   (Next.js hot reload on save)
+#   • api:    mounts ./backend/app → /app/app  (uvicorn --reload picks up changes)
+#   • worker: mounts ./backend/app → /app/app  (worker restarts on change via watchfiles)
+# ============================================================
+
+services:
+
+  web:
+    build:
+      context: ./web
+    volumes:
+      - ./web/app:/web/app          # mount source → hot reload via Next.js HMR
+      - ./web/public:/web/public    # static assets
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${API_PORT:-8000}
+      - WATCHPACK_POLLING=true      # needed on Windows/WSL2 where inotify is unreliable
+    command: ["npm", "run", "dev", "--", "-p", "3000", "-H", "0.0.0.0"]
+
+  api:
+    volumes:
+      - ./backend/app:/app/app      # mount backend source
+      - ./sample_workspace:/workspace/sample_workspace
+      - ./data/workspaces:/workspace/workspaces
+      - ./data:/data
+    command:
+      - bash
+      - -lc
+      - |
+        python -m app.migrate
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/app
+
+  worker:
+    volumes:
+      - ./backend/app:/app/app      # mount backend source
+      - ./sample_workspace:/workspace/sample_workspace
+      - ./data/workspaces:/workspace/workspaces
+      - ./data:/data
+      - ./ml:/ml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - bash
+      - -lc
+      - |
+        pip install watchfiles --quiet
+        python -m watchfiles 'python -m app.worker' /app/app

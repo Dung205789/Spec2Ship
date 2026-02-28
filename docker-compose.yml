@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-spec2ship}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spec2ship}
+      POSTGRES_DB: ${POSTGRES_DB:-spec2ship}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-spec2ship} -d ${POSTGRES_DB:-spec2ship}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-spec2ship}:${POSTGRES_PASSWORD:-spec2ship}@postgres:5432/${POSTGRES_DB:-spec2ship}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      WORKSPACE_PATH: ${WORKSPACE_PATH:-/workspace/sample_workspace}
+      WORKSPACES_ROOT: ${WORKSPACES_ROOT:-/workspace/workspaces}
+      ARTIFACTS_DIR: ${ARTIFACTS_DIR:-/data/artifacts}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./sample_workspace:/workspace/sample_workspace
+      - ./data/workspaces:/workspace/workspaces
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-spec2ship}:${POSTGRES_PASSWORD:-spec2ship}@postgres:5432/${POSTGRES_DB:-spec2ship}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      WORKSPACE_PATH: ${WORKSPACE_PATH:-/workspace/sample_workspace}
+      WORKSPACES_ROOT: ${WORKSPACES_ROOT:-/workspace/workspaces}
+      ARTIFACTS_DIR: ${ARTIFACTS_DIR:-/data/artifacts}
+      ML_DIR: ${ML_DIR:-/ml}
+    command: ["bash", "-lc", "python -m app.worker"]
+    volumes:
+      - ./sample_workspace:/workspace/sample_workspace
+      - ./data/workspaces:/workspace/workspaces
+      - ./data:/data
+      - ./ml:/ml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      api:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-8000}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

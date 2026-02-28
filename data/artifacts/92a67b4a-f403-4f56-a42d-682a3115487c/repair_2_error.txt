@@ -1,0 +1,1 @@
+FileNotFoundError: [Errno 2] No such file or directory: '/data/run_workspaces/92a67b4a-f403-4f56-a42d-682a3115487c/tinyshop'

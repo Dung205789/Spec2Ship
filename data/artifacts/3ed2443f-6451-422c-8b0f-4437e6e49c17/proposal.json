@@ -1,0 +1,6 @@
+{
+  "patcher_mode": "rules",
+  "title": "Fix discount calculation rounding",
+  "rationale": "Fixes 3 bugs:\n1. apply_discount: uses Python banker rounding → replaced with Decimal ROUND_HALF_UP\n2. apply_tax: uses floor division (//) → replaced with Decimal ROUND_HALF_UP\n3. calculate_final_price: tax was calculated on subtotal → now calculated on after_discount",
+  "diff": "diff --git a/tinyshop/pricing.py b/tinyshop/pricing.py\n--- a/tinyshop/pricing.py\n+++ b/tinyshop/pricing.py\n@@ -6,15 +6,9 @@\n \n \n def apply_discount(total_cents: int, percent: int) -> int:\n-    \"\"\"Return discounted total in cents.\n-\n-    Rules:\n-    - percent is an integer 0..100\n-    - rounding is **half-up** to the nearest cent\n-\n-    Current implementation is wrong (rounds down).\n+    \"\"\"Apply percentage discount. Returns discounted price in cents.\n+    Rounding: half-up to nearest cent.\n     \"\"\"\n-    percent = max(0, min(100, percent))\n-\n-    # BUG: int() floors, so 895.5 becomes 895 (should be 896)\n-    return int(total_cents * (100 - percent) / 100)\n+    from decimal import Decimal, ROUND_HALF_UP\n+    discount = (Decimal(total_cents) * Decimal(percent) / Decimal(100)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)\n+    return int(Decimal(total_cents) - discount)\n"
+}

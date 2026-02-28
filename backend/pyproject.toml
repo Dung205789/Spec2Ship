@@ -1,0 +1,52 @@
+[project]
+name = "spec2ship"
+version = "0.1.0"
+description = "Local-first delivery pipeline API (ticket → patch → approval → report)"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi==0.115.6",
+  "uvicorn[standard]==0.30.6",
+  # Required for FastAPI multipart form uploads (workspace ZIP import)
+  "python-multipart==0.0.9",
+  "pydantic==2.9.2",
+  "pydantic-settings==2.5.2",
+  "SQLAlchemy==2.0.36",
+  "psycopg2-binary==2.9.9",
+  "alembic==1.14.0",
+  "python-dotenv==1.0.1",
+  "redis==5.2.0",
+  "rq==1.16.2",
+  "rank-bm25==0.2.2",
+  "httpx==0.27.2",
+  "PyYAML==6.0.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.3",
+  "ruff==0.7.4",
+]
+prod = [
+  "pytest==8.3.3",
+  # ML / evaluation (SWE-bench harness)
+  # NOTE: heavy by design; used by the RQ worker when running dataset evaluations.
+  "datasets>=2.18,<3",
+  "swebench==4.1.0",
+  "tqdm>=4.66,<5",
+]
+
+# Training + HuggingFace local inference (LoRA/PEFT)
+train = [
+  "torch>=2.2,<3",
+  "transformers>=4.40,<5",
+  "peft>=0.11,<1",
+  "accelerate>=0.29,<1",
+  "sentencepiece>=0.2,<1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["app/tests"]

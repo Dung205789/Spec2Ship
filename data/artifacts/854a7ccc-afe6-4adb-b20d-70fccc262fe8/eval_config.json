@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-02-27T11:02:04.166112",
+  "prompt_dataset": "princeton-nlp/SWE-bench_Lite_bm25_13K",
+  "dataset_name": "princeton-nlp/SWE-bench_Lite",
+  "split": "test",
+  "limit": 1,
+  "max_workers": 1,
+  "ollama": "http://ollama:11434",
+  "model": "qwen2.5-coder:7b",
+  "temperature": 0.0,
+  "num_ctx": 1024,
+  "timeout_s": 120
+}
