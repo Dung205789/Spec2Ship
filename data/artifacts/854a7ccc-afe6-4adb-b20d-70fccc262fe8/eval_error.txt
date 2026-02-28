@@ -1,0 +1,21 @@
+Root cause (traceback excerpt):
+Traceback (most recent call last):
+  File "/ml/swebench/generate_predictions_ollama.py", line 123, in <module>
+    main()
+  File "/ml/swebench/generate_predictions_ollama.py", line 96, in main
+    raw = ollama_generate(
+          ^^^^^^^^^^^^^^^^
+  File "/ml/swebench/generate_predictions_ollama.py", line 32, in ollama_generate
+    r = client.post("/api/generate", json=payload)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/httpx/_client.py", line 1157, in post
+    return self.request(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/httpx/_client.py", line 837, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/httpx/_client.py", line 926, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/httpx/_client.py", line 954, in _send_handling_auth
+    response = self._send_handling_redirects(

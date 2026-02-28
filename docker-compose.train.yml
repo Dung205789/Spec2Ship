@@ -1,0 +1,12 @@
+services:
+  # Adds heavy training deps only to the worker image.
+  worker:
+    build:
+      context: ./backend
+      args:
+        PIP_EXTRAS: "prod,train"
+    environment:
+      # Cache HF downloads on the shared /data volume (optional but recommended)
+      HF_HOME: /data/hf_cache
+      TRANSFORMERS_CACHE: /data/hf_cache
+      HF_HUB_DISABLE_TELEMETRY: "1"

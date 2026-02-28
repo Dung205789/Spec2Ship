@@ -1,0 +1,394 @@
+{
+  "docs": [
+    {
+      "doc_id": "/data/run_workspaces/ce7b872a-ab11-42d0-b3db-b835538bf288/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ce7b872a-ab11-42d0-b3db-b835538bf288/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/c0b66ffb-243b-4dac-b39a-ac1ccd985ad7/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/c0b66ffb-243b-4dac-b39a-ac1ccd985ad7/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/00f3e056-15a7-405f-b9db-4f48ec853e90/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/00f3e056-15a7-405f-b9db-4f48ec853e90/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/94662d0d-eca9-46a5-aaed-ee789923565b/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/94662d0d-eca9-46a5-aaed-ee789923565b/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/8e05a66b-5dfa-4452-a04a-6e259167c7b3/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/8e05a66b-5dfa-4452-a04a-6e259167c7b3/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/2bca8cd2-2fae-4954-959a-a2a314a8e283/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/2bca8cd2-2fae-4954-959a-a2a314a8e283/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/29664c6d-70ca-4b80-8b00-382167605875/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/29664c6d-70ca-4b80-8b00-382167605875/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/3ed2443f-6451-422c-8b0f-4437e6e49c17/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/3ed2443f-6451-422c-8b0f-4437e6e49c17/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/873433be-c9d7-4ca4-b672-6b6d98294d6d/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/873433be-c9d7-4ca4-b672-6b6d98294d6d/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/bd72c5ca-d613-4234-ab53-e864c5426c1c/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/bd72c5ca-d613-4234-ab53-e864c5426c1c/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/92a67b4a-f403-4f56-a42d-682a3115487c/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/92a67b4a-f403-4f56-a42d-682a3115487c/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/77fa70d5-d6e8-4174-a876-3b4d5c1ea514/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/77fa70d5-d6e8-4174-a876-3b4d5c1ea514/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/1593453f-81e7-4f14-b8e5-d4181c6320cd/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/1593453f-81e7-4f14-b8e5-d4181c6320cd/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/b38946cc-ebae-46bc-90f0-6236e3100d56/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/b38946cc-ebae-46bc-90f0-6236e3100d56/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/4effa707-e114-4826-b1dc-b1a3fd9f36c5/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/4effa707-e114-4826-b1dc-b1a3fd9f36c5/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/93113921-a5aa-4575-b4c3-30365a986811/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/93113921-a5aa-4575-b4c3-30365a986811/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/522de407-c9b3-4b33-86e2-5299d3801517/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/522de407-c9b3-4b33-86e2-5299d3801517/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/d881644f-9ef7-44c9-85c3-5542cf1467a9/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/d881644f-9ef7-44c9-85c3-5542cf1467a9/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/4223e113-be3e-4401-b4c9-196ebd0d746a/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/4223e113-be3e-4401-b4c9-196ebd0d746a/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/5ca24d1f-93a6-4389-b0aa-7350beee1669/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/5ca24d1f-93a6-4389-b0aa-7350beee1669/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/29415ad2-5de6-461b-a021-7c3e1a28c122/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/29415ad2-5de6-461b-a021-7c3e1a28c122/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/aac9696d-8e37-447d-8b02-2ac7daee8275/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/aac9696d-8e37-447d-8b02-2ac7daee8275/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/5609c37a-7c91-4f9a-9d25-4423d5d05124/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/5609c37a-7c91-4f9a-9d25-4423d5d05124/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ece5be72-f498-4018-b268-0959ebfe66af/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ece5be72-f498-4018-b268-0959ebfe66af/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/77062bf3-ea62-4f48-b56f-a3be92952a12/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/77062bf3-ea62-4f48-b56f-a3be92952a12/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ab46d88e-44f2-4895-86d9-84316615069d/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ab46d88e-44f2-4895-86d9-84316615069d/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/d34f493b-57da-480f-b49b-d67a5c3d81de/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/d34f493b-57da-480f-b49b-d67a5c3d81de/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/056b33fd-f27d-4a2b-8bb6-d8f30dc761c7/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/056b33fd-f27d-4a2b-8bb6-d8f30dc761c7/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/991b7254-63e3-4bb9-a10a-85a65f3b0a2c/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/991b7254-63e3-4bb9-a10a-85a65f3b0a2c/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ce42d869-0994-4255-8acd-8e11ed6c0036/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/ce42d869-0994-4255-8acd-8e11ed6c0036/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/2fa80900-66ff-45b5-b337-dd2c81b4d922/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/2fa80900-66ff-45b5-b337-dd2c81b4d922/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/691c7cda-bef0-47aa-81ed-18b009639a4f/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/691c7cda-bef0-47aa-81ed-18b009639a4f/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/fd916cbd-cefc-4ef3-a627-2406750b7f99/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/fd916cbd-cefc-4ef3-a627-2406750b7f99/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/1d58fe2f-3077-4df8-97d0-c20dfa50552b/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/1d58fe2f-3077-4df8-97d0-c20dfa50552b/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/997b0dc9-bae5-4a22-a36b-1be62d5b032b/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/997b0dc9-bae5-4a22-a36b-1be62d5b032b/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/f2df238d-a252-4bc2-b3fc-9ea9eae906ae/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/f2df238d-a252-4bc2-b3fc-9ea9eae906ae/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/348c7cc0-f854-4685-8b56-586803facc4b/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/348c7cc0-f854-4685-8b56-586803facc4b/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/7d8bece2-3880-4121-b9d1-8532190d5510/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/7d8bece2-3880-4121-b9d1-8532190d5510/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/2a7f414a-74b5-454a-bf16-72a79ddf2ab6/docs/coding_standards.md",
+      "title": "coding_standards.md",
+      "text": "# Coding Standards\n\n- Prefer small, focused functions.\n- Validate inputs and clamp ranges where needed.\n- For money calculations, be explicit about rounding rules.\n"
+    },
+    {
+      "doc_id": "/data/run_workspaces/2a7f414a-74b5-454a-bf16-72a79ddf2ab6/docs/ticket_examples.md",
+      "title": "ticket_examples.md",
+      "text": "# Ticket Examples\n\n1. Fix failing tests in discount calculation.\n2. Add a /health endpoint for smoke tests.\n"
+    }
+  ]
+}

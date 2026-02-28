@@ -1,0 +1,15 @@
+$ python -m pytest -vv -ra
+
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-8.3.3, pluggy-1.6.0 -- /usr/local/bin/python
+cachedir: .pytest_cache
+rootdir: /data/run_workspaces/691c7cda-bef0-47aa-81ed-18b009639a4f
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 2 items
+
+tests/test_pricing.py::test_discount_rounding_over_http PASSED           [ 50%]
+tests/test_pricing.py::test_percent_is_clamped PASSED                    [100%]
+
+============================== 2 passed in 0.82s ===============================
+

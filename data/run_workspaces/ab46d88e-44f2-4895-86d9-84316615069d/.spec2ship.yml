@@ -1,0 +1,10 @@
+name: tinyshop-python
+language: python
+commands:
+  preflight: python -V
+  baseline: python -m pytest -vv -ra
+  post: python -m pytest -vv -ra
+  smoke: >
+    python -c 'from fastapi.testclient import TestClient; from tinyshop.main import app;
+    c=TestClient(app); r=c.post("/discount", json={"total_cents": 995, "percent": 10});
+    print("status=", r.status_code); print("json=", r.json())'

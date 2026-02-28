@@ -1,0 +1,33 @@
+$ python -m pytest -vv -ra
+
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-8.3.3, pluggy-1.6.0 -- /usr/local/bin/python
+cachedir: .pytest_cache
+rootdir: /data/run_workspaces/056b33fd-f27d-4a2b-8bb6-d8f30dc761c7
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 2 items
+
+tests/test_pricing.py::test_discount_rounding_over_http FAILED           [ 50%]
+tests/test_pricing.py::test_percent_is_clamped PASSED                    [100%]
+
+=================================== FAILURES ===================================
+_______________________ test_discount_rounding_over_http _______________________
+
+    def test_discount_rounding_over_http():
+        # 999 cents with 10% discount => 899.1 => should round to 899
+        r = client.post("/discount", json={"total_cents": 999, "percent": 10})
+        assert r.status_code == 200
+        assert r.json()["discounted_cents"] == 899
+    
+        # 995 cents with 10% => 895.5 => should round to 896
+        r = client.post("/discount", json={"total_cents": 995, "percent": 10})
+        assert r.status_code == 200
+>       assert r.json()["discounted_cents"] == 896
+E       assert 895 == 896
+
+tests/test_pricing.py:18: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_pricing.py::test_discount_rounding_over_http - assert 895 == 896
+========================= 1 failed, 1 passed in 1.19s ==========================
+
