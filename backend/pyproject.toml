@@ -10,7 +10,7 @@ dependencies = [
   "python-multipart==0.0.9",
   "pydantic==2.9.2",
   "pydantic-settings==2.5.2",
-  "SQLAlchemy==2.0.36",
+  "SQLAlchemy==2.0.51",
   "psycopg2-binary==2.9.9",
   "alembic==1.14.0",
   "python-dotenv==1.0.1",
