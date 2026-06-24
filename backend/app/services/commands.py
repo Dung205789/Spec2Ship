@@ -27,9 +27,19 @@ class CommandRunner:
                 text=True,
                 timeout=to,
             )
-            return CommandResult(code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr)
+            return CommandResult(
+                code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr
+            )
         except subprocess.TimeoutExpired as e:
-            out = (e.stdout or "") if isinstance(e.stdout, str) else (e.stdout.decode(errors="ignore") if e.stdout else "")
-            err = (e.stderr or "") if isinstance(e.stderr, str) else (e.stderr.decode(errors="ignore") if e.stderr else "")
-            err = err + f"\n[timeout] command exceeded {to}s" 
+            out = (
+                (e.stdout or "")
+                if isinstance(e.stdout, str)
+                else (e.stdout.decode(errors="ignore") if e.stdout else "")
+            )
+            err = (
+                (e.stderr or "")
+                if isinstance(e.stderr, str)
+                else (e.stderr.decode(errors="ignore") if e.stderr else "")
+            )
+            err = err + f"\n[timeout] command exceeded {to}s"
             return CommandResult(code=124, stdout=out, stderr=err)

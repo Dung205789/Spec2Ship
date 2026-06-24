@@ -30,7 +30,14 @@ class WorkspacePatcher:
     def __init__(self, workspace_path: str) -> None:
         self._root = Path(workspace_path)
 
-    def propose(self, ticket_text: str, signals_text: str, context_text: str | None = None, previous_diff: str | None = None, previous_error: str | None = None) -> PatchProposal:
+    def propose(
+        self,
+        ticket_text: str,
+        signals_text: str,
+        context_text: str | None = None,
+        previous_diff: str | None = None,
+        previous_error: str | None = None,
+    ) -> PatchProposal:
         """Return a patch proposal based on the ticket + tool output."""
         combined = (ticket_text + "\n" + signals_text).lower()
 
@@ -105,9 +112,9 @@ class WorkspacePatcher:
     def _apply_add_health(self, dry_run: bool = False) -> None:
         p = self._root / "tinyshop" / "main.py"
         text = p.read_text(encoding="utf-8")
-        if "@app.get(\"/health\")" in text:
+        if '@app.get("/health")' in text:
             return
-        insert = "\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n"
+        insert = '\n\n@app.get("/health")\ndef health():\n    return {"status": "ok"}\n'
         p.write_text(text + insert, encoding="utf-8")
 
     def _find_cart_file(self) -> "Path | None":
@@ -132,6 +139,7 @@ class WorkspacePatcher:
 
     def _apply_fix_discount_rounding(self, dry_run: bool = False) -> None:
         import re as _re
+
         p = self._find_cart_file()
         if p is None:
             p = self._root / "tinyshop" / "pricing.py"
@@ -151,15 +159,20 @@ class WorkspacePatcher:
             p_pct = params[1] if len(params) > 1 else "discount_percent"
             new_body = (
                 '    """Apply percentage discount. Returns discounted price in cents.\n'
-                '    Rounding: half-up to nearest cent.\n'
-                '    Percent is clamped to 0..100.\n'
+                "    Rounding: half-up to nearest cent.\n"
+                "    Percent is clamped to 0..100.\n"
                 '    """\n'
                 + f"    {p_pct} = max(0, min(100, {p_pct}))\n"
                 + "    from decimal import Decimal, ROUND_HALF_UP\n"
                 + f"    discounted_total = (Decimal({p_amount}) * (Decimal(100) - Decimal({p_pct})) / Decimal(100)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)\n"
                 + "    return int(discounted_total)\n"
             )
-            return src[: m.start()] + f"def apply_discount({sig}) -> int:\n" + new_body + src[m.end():]
+            return (
+                src[: m.start()]
+                + f"def apply_discount({sig}) -> int:\n"
+                + new_body
+                + src[m.end() :]
+            )
 
         def _rewrite_apply_tax(src: str) -> str:
             m = _re.search(
@@ -175,13 +188,13 @@ class WorkspacePatcher:
 
             new_body = (
                 '    """Apply tax rate. Returns total with tax in cents.\n'
-                '    Rounding: half-up to nearest cent.\n'
+                "    Rounding: half-up to nearest cent.\n"
                 '    """\n'
                 + "    from decimal import Decimal, ROUND_HALF_UP\n"
                 + f"    tax = (Decimal({p_amount}) * Decimal({p_rate}) / Decimal(100)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)\n"
                 + f"    return int(Decimal({p_amount}) + tax)\n"
             )
-            return src[: m.start()] + f"def apply_tax({sig}) -> int:\n" + new_body + src[m.end():]
+            return src[: m.start()] + f"def apply_tax({sig}) -> int:\n" + new_body + src[m.end() :]
 
         def _rewrite_calculate_final_price(src: str) -> str:
             # Fix: tax should be calculated on after_discount, not subtotal
@@ -250,8 +263,8 @@ def _sanitize_unified_diff(diff_text: str) -> str:
     i = 0
     hunk_re = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
-    def _is_file_header(l: str) -> bool:
-        return l.startswith("diff --git ") or l.startswith("--- ") or l.startswith("+++ ")
+    def _is_file_header(line: str) -> bool:
+        return line.startswith("diff --git ") or line.startswith("--- ") or line.startswith("+++ ")
 
     while i < len(lines):
         line = lines[i]
@@ -269,15 +282,15 @@ def _sanitize_unified_diff(diff_text: str) -> str:
         new_count = 0
         j = i + 1
         while j < len(lines):
-            l = lines[j]
-            if hunk_re.match(l) or _is_file_header(l):
+            body = lines[j]
+            if hunk_re.match(body) or _is_file_header(body):
                 break
-            if l.startswith("\\"):  # e.g. '\\ No newline at end of file'
+            if body.startswith("\\"):  # e.g. '\\ No newline at end of file'
                 j += 1
                 continue
-            if l.startswith("-") and not l.startswith("--- "):
+            if body.startswith("-") and not body.startswith("--- "):
                 old_count += 1
-            elif l.startswith("+") and not l.startswith("+++ "):
+            elif body.startswith("+") and not body.startswith("+++ "):
                 new_count += 1
             else:
                 # context line (starts with space or other)
@@ -286,7 +299,7 @@ def _sanitize_unified_diff(diff_text: str) -> str:
             j += 1
 
         # Preserve any trailing function context after the @@ ... @@ token.
-        rest = line[m.end():]
+        rest = line[m.end() :]
         out.append(f"@@ -{old_start},{old_count} +{new_start},{new_count} @@" + rest)
         i += 1
 
@@ -320,10 +333,24 @@ class OllamaWorkspacePatcher:
 
     def __init__(self, workspace_path: str) -> None:
         self._root = Path(workspace_path)
-        self._cmd = CommandRunner(cwd=str(self._root), timeout_seconds=getattr(settings, "apply_patch_seconds", None) or settings.git_command_seconds or settings.max_command_seconds)
-        self._ollama = OllamaClient(settings.ollama_base_url, timeout_seconds=settings.ollama_timeout_seconds)
+        self._cmd = CommandRunner(
+            cwd=str(self._root),
+            timeout_seconds=getattr(settings, "apply_patch_seconds", None)
+            or settings.git_command_seconds
+            or settings.max_command_seconds,
+        )
+        self._ollama = OllamaClient(
+            settings.ollama_base_url, timeout_seconds=settings.ollama_timeout_seconds
+        )
 
-    def propose(self, ticket_text: str, signals_text: str, context_text: str | None = None, previous_diff: str | None = None, previous_error: str | None = None) -> PatchProposal:
+    def propose(
+        self,
+        ticket_text: str,
+        signals_text: str,
+        context_text: str | None = None,
+        previous_diff: str | None = None,
+        previous_error: str | None = None,
+    ) -> PatchProposal:
         # Reuse upstream context if available to avoid doing expensive repo scanning twice.
         context = context_text or build_code_context(
             str(self._root),
@@ -393,7 +420,9 @@ class OllamaWorkspacePatcher:
             if data:
                 title = str(data.get("title", "LLM proposal")).strip() or "LLM proposal"
                 rationale = str(data.get("rationale", "")).strip()
-                diff = _sanitize_unified_diff(_strip_patch_wrappers(str(data.get("diff", "")).strip()))
+                diff = _sanitize_unified_diff(
+                    _strip_patch_wrappers(str(data.get("diff", "")).strip())
+                )
                 if not diff:
                     diff = "(no changes)"
                 return PatchProposal(title=title, rationale=rationale, diff=diff)
@@ -402,8 +431,6 @@ class OllamaWorkspacePatcher:
                 rationale="Ollama did not return valid JSON; using raw output as diff.",
                 diff=_sanitize_unified_diff(_strip_patch_wrappers(resp.response)) or "(no changes)",
             )
-
-
 
         def _call_llm_files(extra_prompt: str | None = None) -> PatchProposal | None:
             """Ask the model for full file contents and synthesize a diff locally.
@@ -473,7 +500,11 @@ class OllamaWorkspacePatcher:
 
             return PatchProposal(
                 title=prop.title,
-                rationale=(prop.rationale + "\n\n[Warning] Synthesized diff still fails git apply --check.\n" + err).strip(),
+                rationale=(
+                    prop.rationale
+                    + "\n\n[Warning] Synthesized diff still fails git apply --check.\n"
+                    + err
+                ).strip(),
                 diff=prop.diff,
             )
 
@@ -490,8 +521,7 @@ class OllamaWorkspacePatcher:
                 "Return a corrected unified diff that includes file headers (`diff --git`, `---`, `+++`) "
                 "and correct relative paths. Do not include explanations or markdown.\n\n"
                 f"git apply --check error:\n{err}\n\n"
-                "Here is your previous diff (rewrite it into a valid git patch):\n"
-                + prop.diff
+                "Here is your previous diff (rewrite it into a valid git patch):\n" + prop.diff
             )
             repaired = _call_llm(extra_prompt=extra)
             ok2, err2 = self._git_apply_check(repaired.diff)
@@ -499,7 +529,11 @@ class OllamaWorkspacePatcher:
                 return repaired, True, ""
             repaired2 = PatchProposal(
                 title=repaired.title or prop.title,
-                rationale=(repaired.rationale + "\n\n[Warning] Patch still fails git apply --check.\n" + err2).strip(),
+                rationale=(
+                    repaired.rationale
+                    + "\n\n[Warning] Patch still fails git apply --check.\n"
+                    + err2
+                ).strip(),
                 diff=repaired.diff,
             )
             return repaired2, False, err2
@@ -541,11 +575,13 @@ class OllamaWorkspacePatcher:
         if proposal:
             return PatchProposal(
                 title=proposal.title,
-                rationale=(proposal.rationale + f"\n\n[Warning] Patch still fails git apply --check after {max_attempts} attempts.\n{last_err}").strip(),
+                rationale=(
+                    proposal.rationale
+                    + f"\n\n[Warning] Patch still fails git apply --check after {max_attempts} attempts.\n{last_err}"
+                ).strip(),
                 diff=proposal.diff,
             )
         return _call_llm()
-
 
     def _is_add_only_patch(self, diff_text: str) -> bool:
         """Detect if patch only adds lines (hunk -0,0 +1,N) for an existing file.
@@ -554,6 +590,7 @@ class OllamaWorkspacePatcher:
         instead of replacing it. This produces duplicate function definitions.
         """
         import re as _re
+
         # Check for -0,0 hunk header against an existing file
         for m in _re.finditer(r"^\+\+\+\s+b/(.+)", diff_text, flags=_re.MULTILINE):
             rel = m.group(1).strip()
@@ -566,6 +603,7 @@ class OllamaWorkspacePatcher:
     def _apply_add_only_patch_as_file_replace(self, diff_text: str) -> None:
         """Handle -0,0 patches for existing files by extracting added lines as full content."""
         import re as _re
+
         # Find all file sections
         file_sections = _re.split(r"^(?=diff --git |--- a/)", diff_text, flags=_re.MULTILINE)
         for section in file_sections:
@@ -636,9 +674,7 @@ class OllamaWorkspacePatcher:
         res = self._cmd.run(["git", "apply", "--whitespace=nowarn", str(patch_path)])
         if res.code != 0:
             raise RuntimeError(
-                "Patch failed `git apply`.\n"
-                f"stdout:\n{res.stdout}\n\n"
-                f"stderr:\n{res.stderr}\n"
+                f"Patch failed `git apply`.\nstdout:\n{res.stdout}\n\nstderr:\n{res.stderr}\n"
             )
 
         return proposal.title
@@ -669,7 +705,9 @@ class OllamaWorkspacePatcher:
         combined = (check.stdout or "") + "\n" + (check.stderr or "")
         return False, combined.strip()
 
+
 _HF_MODEL_CACHE: dict[str, tuple[object, object]] = {}  # key -> (tokenizer, model)
+
 
 class HuggingFaceWorkspacePatcher:
     """Local HuggingFace model backed patch proposer + git-apply applier.
@@ -728,7 +766,9 @@ class HuggingFaceWorkspacePatcher:
         if previous_diff:
             prompt += f"\nPREVIOUS DIFF (for reference):\n{previous_diff}\n"
 
-        model_id = (getattr(settings, "hf_model", "") or "").strip() or "Qwen/Qwen2.5-Coder-0.5B-Instruct"
+        model_id = (
+            getattr(settings, "hf_model", "") or ""
+        ).strip() or "Qwen/Qwen2.5-Coder-0.5B-Instruct"
         adapter = (getattr(settings, "hf_adapter_path", "") or "").strip()
         device = (getattr(settings, "hf_device", "cpu") or "cpu").strip().lower()
         max_new = int(getattr(settings, "hf_max_new_tokens", 800) or 800)
@@ -741,6 +781,7 @@ class HuggingFaceWorkspacePatcher:
         if tok is None or model is None:
             from transformers import AutoModelForCausalLM, AutoTokenizer
             import torch
+
             tok = AutoTokenizer.from_pretrained(model_id, use_fast=True)
             if tok.pad_token is None:
                 tok.pad_token = tok.eos_token
@@ -753,12 +794,14 @@ class HuggingFaceWorkspacePatcher:
             )
             if adapter:
                 from peft import PeftModel
+
                 model = PeftModel.from_pretrained(model, adapter)
 
             model.eval()
             _HF_MODEL_CACHE[cache_key] = (tok, model)
 
         import torch
+
         inputs = tok(prompt, return_tensors="pt", truncation=True, max_length=4096)
         if device == "cuda":
             inputs = {k: v.to(model.device) for k, v in inputs.items()}
@@ -775,7 +818,7 @@ class HuggingFaceWorkspacePatcher:
             )
 
         decoded = tok.decode(gen[0], skip_special_tokens=True)
-        completion = decoded[len(prompt):] if decoded.startswith(prompt) else decoded
+        completion = decoded[len(prompt) :] if decoded.startswith(prompt) else decoded
 
         # Parse JSON best-effort
         obj = _extract_json_object(completion)
@@ -798,6 +841,7 @@ class HuggingFaceWorkspacePatcher:
 
     def _is_add_only_patch(self, diff_text: str) -> bool:
         import re as _re
+
         for m in _re.finditer(r"^\+\+\+\s+b/(.+)", diff_text, flags=_re.MULTILINE):
             rel = m.group(1).strip()
             if (self._root / rel).exists():
@@ -807,6 +851,7 @@ class HuggingFaceWorkspacePatcher:
 
     def _apply_add_only_patch_as_file_replace(self, diff_text: str) -> None:
         import re as _re
+
         file_sections = _re.split(r"^(?=diff --git |--- a/)", diff_text, flags=_re.MULTILINE)
         for section in file_sections:
             if not section.strip():
@@ -867,9 +912,7 @@ class HuggingFaceWorkspacePatcher:
         res = self._cmd.run(["git", "apply", "--whitespace=nowarn", str(patch_path)])
         if res.code != 0:
             raise RuntimeError(
-                "Patch failed `git apply`.\n"
-                f"stdout:\n{res.stdout}\n\n"
-                f"stderr:\n{res.stderr}\n"
+                f"Patch failed `git apply`.\nstdout:\n{res.stdout}\n\nstderr:\n{res.stderr}\n"
             )
 
         return proposal.title
@@ -908,6 +951,7 @@ def _extract_json_object(text: str) -> dict:
     # Find the first {...} block
     import json as _json
     import re as _re
+
     m = _re.search(r"\{.*\}", text, flags=_re.DOTALL)
     if not m:
         return {}

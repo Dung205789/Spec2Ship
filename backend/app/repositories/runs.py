@@ -29,15 +29,14 @@ class RunRepository:
 
     def delete(self, run_id: UUID) -> None:
         from sqlalchemy import delete
+
         stmt = delete(Run).where(Run.id == run_id)
         self._db.execute(stmt)
         self._db.commit()
 
     def set_status(self, run_id: UUID, status: str) -> None:
         stmt = (
-            update(Run)
-            .where(Run.id == run_id)
-            .values(status=status, updated_at=datetime.utcnow())
+            update(Run).where(Run.id == run_id).values(status=status, updated_at=datetime.utcnow())
         )
         self._db.execute(stmt)
         self._db.commit()

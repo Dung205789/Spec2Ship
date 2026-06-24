@@ -26,9 +26,9 @@ class Settings(BaseSettings):
     preflight_seconds: int = 30
     smoke_seconds: int = 60
     apply_patch_seconds: int = 120
-    max_command_seconds: int = 300      # low for local; server: 900
-    git_command_seconds: int = 120      # server: 600
-    test_command_seconds: int = 300     # server: 1800
+    max_command_seconds: int = 300  # low for local; server: 900
+    git_command_seconds: int = 120  # server: 600
+    test_command_seconds: int = 300  # server: 1800
 
     # Patch proposer: "rules" | "ollama" | "hf"
     patcher_mode: str = "rules"
@@ -40,21 +40,21 @@ class Settings(BaseSettings):
     # Ollama
     ollama_base_url: str = "http://ollama:11434"
     ollama_model: str = "qwen2.5-coder:7b"
-    ollama_timeout_seconds: int = 300   # low for local; server: 600+
+    ollama_timeout_seconds: int = 300  # low for local; server: 600+
     ollama_temperature: float = 0.15
-    ollama_num_ctx: int = 4096          # low for local; server: 8192+
+    ollama_num_ctx: int = 4096  # low for local; server: 8192+
 
     # HuggingFace local patcher
     hf_model: str = "Qwen/Qwen2.5-Coder-0.5B-Instruct"
     hf_adapter_path: str = ""
     hf_device: str = "cpu"
-    hf_max_new_tokens: int = 512        # low for local; server: 800+
+    hf_max_new_tokens: int = 512  # low for local; server: 800+
     hf_temperature: float = 0.2
     hf_top_p: float = 0.95
 
     # Code context for LLM prompts
-    code_context_max_files: int = 8     # server: 12-15
-    code_context_max_chars: int = 12000 # server: 20000+
+    code_context_max_files: int = 8  # server: 12-15
+    code_context_max_chars: int = 12000  # server: 20000+
 
     # RQ job
     rq_job_timeout_seconds: int = 7200

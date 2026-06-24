@@ -47,6 +47,7 @@ class StepRepository:
 
     def delete_for_run(self, run_id: UUID) -> None:
         from sqlalchemy import delete
+
         stmt = delete(Step).where(Step.run_id == run_id)
         self._db.execute(stmt)
         self._db.commit()
@@ -61,19 +62,23 @@ class StepRepository:
         self._db.commit()
 
     def set_waiting(self, step_id: UUID, summary: str = "") -> None:
-        stmt = (
-            update(Step)
-            .where(Step.id == step_id)
-            .values(status="waiting", summary=summary)
-        )
+        stmt = update(Step).where(Step.id == step_id).values(status="waiting", summary=summary)
         self._db.execute(stmt)
         self._db.commit()
 
-    def set_success(self, step_id: UUID, summary: str = "", log_path: str = "", artifact_path: str = "") -> None:
+    def set_success(
+        self, step_id: UUID, summary: str = "", log_path: str = "", artifact_path: str = ""
+    ) -> None:
         stmt = (
             update(Step)
             .where(Step.id == step_id)
-            .values(status="success", summary=summary, finished_at=datetime.utcnow(), log_path=log_path, artifact_path=artifact_path)
+            .values(
+                status="success",
+                summary=summary,
+                finished_at=datetime.utcnow(),
+                log_path=log_path,
+                artifact_path=artifact_path,
+            )
         )
         self._db.execute(stmt)
         self._db.commit()
@@ -86,7 +91,6 @@ class StepRepository:
         )
         self._db.execute(stmt)
         self._db.commit()
-
 
     def set_skipped(self, step_id: UUID, summary: str = "") -> None:
         stmt = (

@@ -25,7 +25,9 @@ class WorkspaceImportResult:
     note: str | None = None
 
 
-def resolve_workspace_path(default_path: str, workspace_name: str, workspaces_root: str = "/workspace/workspaces") -> str:
+def resolve_workspace_path(
+    default_path: str, workspace_name: str, workspaces_root: str = "/workspace/workspaces"
+) -> str:
     """Resolve a workspace name to an on-disk path.
 
     Safety: only allow simple names and keep everything under /workspace.
@@ -46,13 +48,19 @@ def resolve_workspace_path(default_path: str, workspace_name: str, workspaces_ro
     return str(candidate) if candidate.exists() else default_path
 
 
-def list_workspaces(default_path: str, workspaces_root: str = "/workspace/workspaces") -> list[WorkspaceInfo]:
+def list_workspaces(
+    default_path: str, workspaces_root: str = "/workspace/workspaces"
+) -> list[WorkspaceInfo]:
     root = Path(workspaces_root)
     root.mkdir(parents=True, exist_ok=True)
 
     out: list[WorkspaceInfo] = []
     # Sample workspace is always available.
-    out.append(WorkspaceInfo(name="sample_workspace", path=default_path, exists=Path(default_path).exists()))
+    out.append(
+        WorkspaceInfo(
+            name="sample_workspace", path=default_path, exists=Path(default_path).exists()
+        )
+    )
 
     for p in sorted(root.iterdir() if root.exists() else [], key=lambda x: x.name.lower()):
         if not p.is_dir():
@@ -64,7 +72,7 @@ def list_workspaces(default_path: str, workspaces_root: str = "/workspace/worksp
     return out
 
 
-_SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9._-]+");
+_SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9._-]+")
 
 
 def sanitize_workspace_name(name: str) -> str:
@@ -182,11 +190,11 @@ def import_workspace_zip(
     meta.write_text(
         (
             "{\n"
-            f"  \"name\": \"{name}\",\n"
-            f"  \"created_at\": \"{time.strftime('%Y-%m-%dT%H:%M:%S')}\",\n"
-            f"  \"file_count\": {file_count},\n"
-            f"  \"extracted_bytes\": {extracted_bytes},\n"
-            f"  \"skipped_files\": {skipped}\n"
+            f'  "name": "{name}",\n'
+            f'  "created_at": "{time.strftime("%Y-%m-%dT%H:%M:%S")}",\n'
+            f'  "file_count": {file_count},\n'
+            f'  "extracted_bytes": {extracted_bytes},\n'
+            f'  "skipped_files": {skipped}\n'
             "}\n"
         ),
         encoding="utf-8",

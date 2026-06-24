@@ -72,7 +72,11 @@ class RunSWEbenchTrainLoRA:
         by_name = {s.name: s for s in steps}
 
         # ---- Config (training) ----
-        base_model = self._cfg.get("base_model", os.getenv("HF_MODEL", getattr(settings, "hf_model", "")) or "Qwen/Qwen2.5-Coder-0.5B-Instruct")
+        base_model = self._cfg.get(
+            "base_model",
+            os.getenv("HF_MODEL", getattr(settings, "hf_model", ""))
+            or "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+        )
         train_dataset = self._cfg.get("train_dataset", "princeton-nlp/SWE-bench_bm25_13K")
         train_split = self._cfg.get("train_split", self._cfg.get("train_split", "train"))
         train_limit = int(self._cfg.get("train_limit", "200") or "200")
@@ -84,11 +88,16 @@ class RunSWEbenchTrainLoRA:
         device = self._cfg.get("device", os.getenv("HF_DEVICE", "cpu"))
 
         # ---- Config (evaluation) ----
-        prompt_dataset = self._cfg.get("prompt_dataset", self._cfg.get("dataset", settings.swebench_prompt_dataset))
+        prompt_dataset = self._cfg.get(
+            "prompt_dataset", self._cfg.get("dataset", settings.swebench_prompt_dataset)
+        )
         dataset_name = self._cfg.get("dataset_name", settings.swebench_dataset_name)
         split = self._cfg.get("split", "test")
         limit = int(self._cfg.get("limit", "0") or "0")
-        max_workers = int(self._cfg.get("max_workers", str(settings.swebench_max_workers)) or str(settings.swebench_max_workers))
+        max_workers = int(
+            self._cfg.get("max_workers", str(settings.swebench_max_workers))
+            or str(settings.swebench_max_workers)
+        )
 
         max_new_tokens = int(self._cfg.get("max_new_tokens", "512") or "512")
         temperature = float(self._cfg.get("temperature", "0.2") or "0.2")
@@ -103,7 +112,9 @@ class RunSWEbenchTrainLoRA:
 
         sock = Path("/var/run/docker.sock")
         if not sock.exists():
-            msg = "Missing /var/run/docker.sock inside worker. SWE-bench harness needs Docker access."
+            msg = (
+                "Missing /var/run/docker.sock inside worker. SWE-bench harness needs Docker access."
+            )
             p = self._store.write_text(str(run_id), "train_eval_error.txt", msg)
             self._artifacts.add(run_id, "train_eval_error", p)
             self._steps.set_failed(s.id, error=msg, log_path=p)
@@ -190,7 +201,9 @@ class RunSWEbenchTrainLoRA:
         meta_path = adapter_dir / "train_meta.json"
         if meta_path.exists():
             self._artifacts.add(run_id, "lora_train_meta", str(meta_path))
-        self._steps.set_success(s.id, summary="Adapter trained", log_path=tr_log_path, artifact_path=str(adapter_dir))
+        self._steps.set_success(
+            s.id, summary="Adapter trained", log_path=tr_log_path, artifact_path=str(adapter_dir)
+        )
 
         # 3) Generate predictions (HF)
         s = by_name["Generate predictions (HF)"]
@@ -242,7 +255,12 @@ class RunSWEbenchTrainLoRA:
             return TrainEvalResult(ok=False, message=msg)
 
         self._artifacts.add(run_id, "predictions_hf", str(predictions_path))
-        self._steps.set_success(s.id, summary="Wrote predictions.hf.jsonl", log_path=gen_log_path, artifact_path=str(predictions_path))
+        self._steps.set_success(
+            s.id,
+            summary="Wrote predictions.hf.jsonl",
+            log_path=gen_log_path,
+            artifact_path=str(predictions_path),
+        )
 
         # 4) Run harness
         s = by_name["Run SWE-bench harness"]
@@ -274,7 +292,12 @@ class RunSWEbenchTrainLoRA:
             return TrainEvalResult(ok=False, message=msg)
 
         self._artifacts.add(run_id, "swebench_results_json", str(results_json))
-        self._steps.set_success(s.id, summary="Harness completed", log_path=harness_log_path, artifact_path=str(results_json))
+        self._steps.set_success(
+            s.id,
+            summary="Harness completed",
+            log_path=harness_log_path,
+            artifact_path=str(results_json),
+        )
 
         # 5) Report
         s = by_name["Report"]
@@ -313,6 +336,8 @@ class RunSWEbenchTrainLoRA:
         metrics_path = self._store.write_json(str(run_id), "metrics_hf.json", {"results": data})
         self._artifacts.add(run_id, "metrics_hf", metrics_path)
 
-        self._steps.set_success(s.id, summary="Report ready", artifact_path=str(report_path), log_path=rep_log_path)
+        self._steps.set_success(
+            s.id, summary="Report ready", artifact_path=str(report_path), log_path=rep_log_path
+        )
         self._runs.set_status(run_id, "completed")
         return TrainEvalResult(ok=True, message="Completed")
