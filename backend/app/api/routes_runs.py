@@ -55,7 +55,9 @@ def _ensure_mutable(run_status: str) -> None:
 @router.post("/", response_model=RunOut)
 def create_run(payload: RunCreate, db: Session = Depends(get_db)) -> RunOut:
     runs = RunRepository(db)
-    run = runs.create(title=payload.title, ticket_text=payload.ticket_text, workspace=payload.workspace)
+    run = runs.create(
+        title=payload.title, ticket_text=payload.ticket_text, workspace=payload.workspace
+    )
     return RunOut.model_validate(run)
 
 
@@ -130,6 +132,7 @@ def patch_decision(
 
 def _reset_steps_from(db: Session, run_id: UUID, from_order: int) -> None:
     from sqlalchemy import update
+
     stmt = (
         update(Step)
         .where(Step.run_id == run_id)
@@ -175,7 +178,9 @@ def retry_step(
         raise HTTPException(status_code=404, detail=f"Step '{step}' not found")
 
     if reset_workspace:
-        base_ws = resolve_workspace_path(settings.workspace_path, run.workspace, settings.workspaces_root)
+        base_ws = resolve_workspace_path(
+            settings.workspace_path, run.workspace, settings.workspaces_root
+        )
         reset_run_workspace(str(run_id), base_ws)
 
     _reset_steps_from(db, run_id, target.order)
@@ -310,13 +315,18 @@ def run_summary(run_id: UUID, db: Session = Depends(get_db)) -> dict:
         "title": run.title,
         "status": run.status,
         "workspace": run.workspace,
-        "steps": [{"name": s.name, "status": s.status, "summary": s.summary, "error": s.error} for s in steps],
+        "steps": [
+            {"name": s.name, "status": s.status, "summary": s.summary, "error": s.error}
+            for s in steps
+        ],
         "artifact_kinds": [a.kind for a in artifacts],
     }
 
 
 @router.get("/{run_id}/live_log")
-def live_log(run_id: UUID, kind: str = Query("post_checks_log"), db: Session = Depends(get_db)) -> dict:
+def live_log(
+    run_id: UUID, kind: str = Query("post_checks_log"), db: Session = Depends(get_db)
+) -> dict:
     """Return latest content of a log artifact — for polling-based live view."""
     artifacts = ArtifactRepository(db)
     arts = artifacts.list_for_run(run_id)
@@ -339,6 +349,7 @@ def get_signals(run_id: UUID, db: Session = Depends(get_db)) -> dict:
         return {"signals": [], "found": False}
     try:
         import json
+
         data = json.loads(Path(match.path).read_text(encoding="utf-8"))
         return {**data, "found": True}
     except Exception as e:

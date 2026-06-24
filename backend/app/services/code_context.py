@@ -1,27 +1,101 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 _STOPWORDS = {
-    "the", "and", "for", "with", "that", "this", "from", "into", "when", "then",
-    "than", "have", "has", "had", "will", "would", "should", "could", "cant",
-    "cannot", "not", "your", "you", "our", "are", "is", "was", "were", "be",
-    "being", "been", "it", "in", "on", "to", "of", "a", "an", "as", "at",
-    "by", "or", "if", "else", "true", "false",
+    "the",
+    "and",
+    "for",
+    "with",
+    "that",
+    "this",
+    "from",
+    "into",
+    "when",
+    "then",
+    "than",
+    "have",
+    "has",
+    "had",
+    "will",
+    "would",
+    "should",
+    "could",
+    "cant",
+    "cannot",
+    "not",
+    "your",
+    "you",
+    "our",
+    "are",
+    "is",
+    "was",
+    "were",
+    "be",
+    "being",
+    "been",
+    "it",
+    "in",
+    "on",
+    "to",
+    "of",
+    "a",
+    "an",
+    "as",
+    "at",
+    "by",
+    "or",
+    "if",
+    "else",
+    "true",
+    "false",
 }
 
 _SKIP_DIRS = {
-    "node_modules", ".git", "__pycache__", ".venv", "venv", "env",
-    "dist", "build", ".next", ".nuxt", ".output", "coverage",
-    ".pytest_cache", ".mypy_cache", "htmlcov", ".tox", ".eggs",
+    "node_modules",
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    "dist",
+    "build",
+    ".next",
+    ".nuxt",
+    ".output",
+    "coverage",
+    ".pytest_cache",
+    ".mypy_cache",
+    "htmlcov",
+    ".tox",
+    ".eggs",
 }
 
 _SKIP_SUFFIXES = {
-    ".pyc", ".pyo", ".so", ".dylib", ".dll", ".class", ".jar",
-    ".ico", ".png", ".jpg", ".jpeg", ".gif", ".woff", ".woff2",
-    ".ttf", ".eot", ".zip", ".tar", ".gz", ".pdf", ".db", ".sqlite",
+    ".pyc",
+    ".pyo",
+    ".so",
+    ".dylib",
+    ".dll",
+    ".class",
+    ".jar",
+    ".ico",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".pdf",
+    ".db",
+    ".sqlite",
     ".lock",
 }
 
@@ -58,12 +132,25 @@ def _extract_file_hints(text: str) -> list[str]:
 def _detect_language(path: Path) -> str:
     ext = path.suffix.lower()
     return {
-        ".py": "python", ".js": "javascript", ".ts": "typescript",
-        ".tsx": "tsx", ".jsx": "jsx", ".go": "go", ".rs": "rust",
-        ".java": "java", ".rb": "ruby", ".php": "php",
-        ".cs": "csharp", ".cpp": "cpp", ".c": "c",
-        ".toml": "toml", ".yaml": "yaml", ".yml": "yaml",
-        ".json": "json", ".sh": "bash", ".md": "markdown",
+        ".py": "python",
+        ".js": "javascript",
+        ".ts": "typescript",
+        ".tsx": "tsx",
+        ".jsx": "jsx",
+        ".go": "go",
+        ".rs": "rust",
+        ".java": "java",
+        ".rb": "ruby",
+        ".php": "php",
+        ".cs": "csharp",
+        ".cpp": "cpp",
+        ".c": "c",
+        ".toml": "toml",
+        ".yaml": "yaml",
+        ".yml": "yaml",
+        ".json": "json",
+        ".sh": "bash",
+        ".md": "markdown",
     }.get(ext, "")
 
 
@@ -86,14 +173,13 @@ def _best_excerpt(content: str, keywords: list[str], context_lines: int = 60) ->
     lines = content.splitlines()
     if not lines:
         return ""
-    lower = content.lower()
     window = min(context_lines * 2, len(lines))
 
     best_start = 0
     best_density = 0
     step = max(1, window // 2)
     for start in range(0, max(1, len(lines) - window), step):
-        chunk = "\n".join(lines[start:start + window]).lower()
+        chunk = "\n".join(lines[start : start + window]).lower()
         density = sum(chunk.count(kw) for kw in keywords)
         if density > best_density:
             best_density = density
@@ -141,9 +227,21 @@ def build_code_context(
     file_hints = _extract_file_hints(signals_text)
 
     patterns = [
-        "*.py", "*.js", "*.ts", "*.tsx", "*.jsx", "*.go", "*.rs", "*.rb",
-        "*.java", "*.php", "pyproject.toml", "package.json",
-        "requirements.txt", "setup.py", "setup.cfg",
+        "*.py",
+        "*.js",
+        "*.ts",
+        "*.tsx",
+        "*.jsx",
+        "*.go",
+        "*.rs",
+        "*.rb",
+        "*.java",
+        "*.php",
+        "pyproject.toml",
+        "package.json",
+        "requirements.txt",
+        "setup.py",
+        "setup.cfg",
     ]
 
     seen: set[Path] = set()
@@ -169,19 +267,23 @@ def build_code_context(
             for hint in file_hints:
                 if rel.endswith(hint) or hint in rel:
                     score += 30
-            if "test" in rel.lower() and any(k in signals_text.lower() for k in ["fail", "error", "assert"]):
+            if "test" in rel.lower() and any(
+                k in signals_text.lower() for k in ["fail", "error", "assert"]
+            ):
                 score += 10
             if p.name in {"pyproject.toml", "package.json", "requirements.txt"}:
                 score += 5
             if score <= 0:
                 continue
 
-            snippets.append(Snippet(
-                path=rel,
-                score=score,
-                excerpt=_best_excerpt(content, keywords),
-                language=_detect_language(p),
-            ))
+            snippets.append(
+                Snippet(
+                    path=rel,
+                    score=score,
+                    excerpt=_best_excerpt(content, keywords),
+                    language=_detect_language(p),
+                )
+            )
 
     snippets.sort(key=lambda s: s.score, reverse=True)
     snippets = snippets[:max_files]

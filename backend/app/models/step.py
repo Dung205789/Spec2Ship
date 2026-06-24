@@ -16,7 +16,9 @@ class Step(Base):
 
     order: Mapped[int] = mapped_column(Integer, nullable=False)
     name: Mapped[str] = mapped_column(String(80), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")  # pending/running/success/failed/waiting
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="pending"
+    )  # pending/running/success/failed/waiting
 
     summary: Mapped[str] = mapped_column(String(300), nullable=False, default="")
     log_path: Mapped[str] = mapped_column(String(400), nullable=False, default="")
