@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import difflib
 from pathlib import Path
-from typing import Iterable
 
 
 def snapshot_files(root: str, include_globs: list[str]) -> dict[str, str]:

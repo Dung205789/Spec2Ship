@@ -59,23 +59,39 @@ class RunSWEbenchEval:
         self._runs.set_status(run_id, "running")
 
         out_dir = self._store.run_dir(str(run_id))
-        runner = CommandRunner(cwd=str(out_dir), timeout_seconds=max(300, settings.rq_job_timeout_seconds - 30))
+        runner = CommandRunner(
+            cwd=str(out_dir), timeout_seconds=max(300, settings.rq_job_timeout_seconds - 30)
+        )
 
         steps = self._steps.list_for_run(run_id)
         by_name = {s.name: s for s in steps}
 
         # Config
-        prompt_dataset = self._cfg.get("prompt_dataset", self._cfg.get("dataset", settings.swebench_prompt_dataset))
+        prompt_dataset = self._cfg.get(
+            "prompt_dataset", self._cfg.get("dataset", settings.swebench_prompt_dataset)
+        )
         dataset_name = self._cfg.get("dataset_name", settings.swebench_dataset_name)
         split = self._cfg.get("split", "test")
         limit = int(self._cfg.get("limit", "0") or "0")
-        max_workers = int(self._cfg.get("max_workers", str(settings.swebench_max_workers)) or str(settings.swebench_max_workers))
+        max_workers = int(
+            self._cfg.get("max_workers", str(settings.swebench_max_workers))
+            or str(settings.swebench_max_workers)
+        )
 
         ollama_url = self._cfg.get("ollama", os.getenv("OLLAMA_BASE_URL", settings.ollama_base_url))
         model = self._cfg.get("model", os.getenv("OLLAMA_MODEL", settings.ollama_model))
-        temperature = float(self._cfg.get("temperature", os.getenv("OLLAMA_TEMPERATURE", str(settings.ollama_temperature))))
-        num_ctx = int(self._cfg.get("num_ctx", os.getenv("OLLAMA_NUM_CTX", str(settings.ollama_num_ctx))))
-        timeout_s = int(self._cfg.get("timeout", str(settings.ollama_timeout_seconds)) or str(settings.ollama_timeout_seconds))
+        temperature = float(
+            self._cfg.get(
+                "temperature", os.getenv("OLLAMA_TEMPERATURE", str(settings.ollama_temperature))
+            )
+        )
+        num_ctx = int(
+            self._cfg.get("num_ctx", os.getenv("OLLAMA_NUM_CTX", str(settings.ollama_num_ctx)))
+        )
+        timeout_s = int(
+            self._cfg.get("timeout", str(settings.ollama_timeout_seconds))
+            or str(settings.ollama_timeout_seconds)
+        )
 
         predictions_path = out_dir / "predictions.jsonl"
 
@@ -85,7 +101,9 @@ class RunSWEbenchEval:
 
         sock = Path("/var/run/docker.sock")
         if not sock.exists():
-            msg = "Missing /var/run/docker.sock inside worker. SWE-bench harness needs Docker access."
+            msg = (
+                "Missing /var/run/docker.sock inside worker. SWE-bench harness needs Docker access."
+            )
             p = self._store.write_text(str(run_id), "eval_error.txt", msg)
             self._artifacts.add(run_id, "eval_error", p)
             self._steps.set_failed(s.id, error=msg, log_path=p)
@@ -163,7 +181,12 @@ class RunSWEbenchEval:
             return EvalResult(ok=False, message=msg)
 
         self._artifacts.add(run_id, "predictions", str(predictions_path))
-        self._steps.set_success(s.id, summary=f"Wrote predictions.jsonl", log_path=gen_log_path, artifact_path=str(predictions_path))
+        self._steps.set_success(
+            s.id,
+            summary="Wrote predictions.jsonl",
+            log_path=gen_log_path,
+            artifact_path=str(predictions_path),
+        )
 
         # 3) Run harness
         s = by_name["Run SWE-bench harness"]
@@ -201,7 +224,12 @@ class RunSWEbenchEval:
             return EvalResult(ok=False, message=msg)
 
         self._artifacts.add(run_id, "swebench_results_json", str(results_json))
-        self._steps.set_success(s.id, summary="Harness completed", log_path=harness_log_path, artifact_path=str(results_json))
+        self._steps.set_success(
+            s.id,
+            summary="Harness completed",
+            log_path=harness_log_path,
+            artifact_path=str(results_json),
+        )
 
         # 4) Report
         s = by_name["Report"]
@@ -240,7 +268,9 @@ class RunSWEbenchEval:
         metrics_path = self._store.write_json(str(run_id), "metrics.json", {"results": data})
         self._artifacts.add(run_id, "metrics", metrics_path)
 
-        self._steps.set_success(s.id, summary="Report ready", artifact_path=str(report_path), log_path=rep_log_path)
+        self._steps.set_success(
+            s.id, summary="Report ready", artifact_path=str(report_path), log_path=rep_log_path
+        )
 
         self._runs.set_status(run_id, "completed")
         return EvalResult(ok=True, message="Completed")
@@ -258,7 +288,7 @@ class RunSWEbenchEval:
             if "Traceback (most recent call last):" in ln:
                 tb_start = i
         if tb_start is not None:
-            excerpt = lines[tb_start: tb_start + max_lines]
+            excerpt = lines[tb_start : tb_start + max_lines]
             return "Root cause (traceback excerpt):\n" + "\n".join(excerpt)
 
         # Otherwise try common failure signatures.

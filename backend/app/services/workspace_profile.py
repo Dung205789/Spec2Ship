@@ -20,6 +20,7 @@ class WorkspaceProfile:
       commands:
         preflight, baseline, post, smoke
     """
+
     name: str = "default"
     language: str | None = None
     preflight: str | None = None
@@ -40,11 +41,11 @@ def _auto_detect_profile(root: Path) -> WorkspaceProfile:
     """Try to detect project type and build a sensible profile."""
     # Python (pytest)
     has_pytest = (
-        (root / "pyproject.toml").exists() or
-        (root / "setup.py").exists() or
-        (root / "setup.cfg").exists() or
-        any(root.rglob("test_*.py")) or
-        any(root.rglob("*_test.py"))
+        (root / "pyproject.toml").exists()
+        or (root / "setup.py").exists()
+        or (root / "setup.cfg").exists()
+        or any(root.rglob("test_*.py"))
+        or any(root.rglob("*_test.py"))
     )
     if has_pytest:
         # Check if pytest is listed as dep
@@ -63,6 +64,7 @@ def _auto_detect_profile(root: Path) -> WorkspaceProfile:
     if (root / "package.json").exists():
         try:
             import json
+
             pkg = json.loads((root / "package.json").read_text())
             scripts = pkg.get("scripts", {})
             test_cmd = scripts.get("test", "npm test")
@@ -143,6 +145,7 @@ def load_workspace_profile(workspace_path: str) -> WorkspaceProfile:
 
 
 # ─── Additional language detectors (appended) ─────────────────────────────
+
 
 def _auto_detect_profile_extended(root: "Path") -> "WorkspaceProfile":
     """Extended auto-detect: Java, Ruby, PHP, shell."""

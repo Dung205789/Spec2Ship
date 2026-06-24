@@ -60,7 +60,11 @@ class RunPipeline:
             return UseCaseResult(ok=False, message="Run not found")
 
         existing = self._steps.list_for_run(run_id)
-        if not existing or len(existing) != len(STEP_NAMES) or [s.name for s in existing] != STEP_NAMES:
+        if (
+            not existing
+            or len(existing) != len(STEP_NAMES)
+            or [s.name for s in existing] != STEP_NAMES
+        ):
             if existing:
                 self._steps.delete_for_run(run_id)
             self._steps.init_steps(run_id, STEP_NAMES)
@@ -69,7 +73,9 @@ class RunPipeline:
         steps_by_name = {s.name: s for s in existing}
         self._runs.set_status(run_id, "running")
 
-        base_ws = resolve_workspace_path(settings.workspace_path, run.workspace, settings.workspaces_root)
+        base_ws = resolve_workspace_path(
+            settings.workspace_path, run.workspace, settings.workspaces_root
+        )
         ws = ensure_run_workspace(str(run_id), base_ws)
 
         profile = load_workspace_profile(ws)
@@ -79,7 +85,12 @@ class RunPipeline:
         mode, cfg = parse_spec2ship_directives(run.ticket_text)
         overrides = load_run_overrides(str(run_id))
         effective_patcher = (
-            (overrides.get("patcher_mode") or cfg.get("patcher") or cfg.get("patcher_mode") or settings.patcher_mode)
+            (
+                overrides.get("patcher_mode")
+                or cfg.get("patcher")
+                or cfg.get("patcher_mode")
+                or settings.patcher_mode
+            )
             .strip()
             .lower()
         )
@@ -136,10 +147,14 @@ class RunPipeline:
             log_path = write_artifact("preflight_log", "preflight.log", log_content)
 
             if code != 0:
-                self._steps.set_failed(s.id, error="Preflight failed (workspace/environment).", log_path=log_path)
+                self._steps.set_failed(
+                    s.id, error="Preflight failed (workspace/environment).", log_path=log_path
+                )
                 self._runs.set_status(run_id, "failed")
                 return UseCaseResult(ok=False, message="Preflight failed")
-            summary = f"OK — profile: {profile.name}" + (" (auto-detected)" if getattr(profile, "auto_detected", False) else "")
+            summary = f"OK — profile: {profile.name}" + (
+                " (auto-detected)" if getattr(profile, "auto_detected", False) else ""
+            )
             self._steps.set_success(s.id, summary=summary, log_path=log_path)
 
         # ---- Step 2: Baseline checks ----
@@ -162,9 +177,13 @@ class RunPipeline:
                 return UseCaseResult(ok=False, message="Baseline command failed")
 
             if code == 0:
-                self._steps.set_success(s.id, summary="OK (no failures detected)", log_path=log_path)
+                self._steps.set_success(
+                    s.id, summary="OK (no failures detected)", log_path=log_path
+                )
             else:
-                self._steps.set_success(s.id, summary=f"Found failures (exit {code})", log_path=log_path)
+                self._steps.set_success(
+                    s.id, summary=f"Found failures (exit {code})", log_path=log_path
+                )
 
         # ---- Step 3: Summarize issues ----
         s = steps_by_name["Summarize issues"]
@@ -173,7 +192,9 @@ class RunPipeline:
             self._steps.set_running(s.id)
             ensure_not_canceled()
             out, err = latest_test_output()
-            signals = bug_detector.from_output(out, err, language=getattr(profile, "language", None))
+            signals = bug_detector.from_output(
+                out, err, language=getattr(profile, "language", None)
+            )
             payload = {
                 "signals": [sig.__dict__ for sig in signals],
                 "workspace_profile": {
@@ -185,9 +206,14 @@ class RunPipeline:
             }
             json_path = self._store.write_json(str(run_id), "signals.json", payload)
             self._artifacts.add(run_id, kind="signals_json", path=json_path)
-            signals_text = "\n".join([f"- [{sig.kind}] {sig.summary}: {sig.details}" for sig in signals]) or "(no signals parsed from output)"
+            signals_text = (
+                "\n".join([f"- [{sig.kind}] {sig.summary}: {sig.details}" for sig in signals])
+                or "(no signals parsed from output)"
+            )
             txt_path = write_artifact("signals_text", "signals.txt", signals_text)
-            self._steps.set_success(s.id, summary=f"{len(signals)} signal(s) extracted", artifact_path=txt_path)
+            self._steps.set_success(
+                s.id, summary=f"{len(signals)} signal(s) extracted", artifact_path=txt_path
+            )
         else:
             if s.artifact_path and Path(s.artifact_path).exists():
                 signals_text = read_text_safe(s.artifact_path)
@@ -211,7 +237,11 @@ class RunPipeline:
                 ingested = 0
 
             ctx = kb.search(run.ticket_text, k=4)
-            kb_text = "\n\n".join([f"### {d.title}\n{d.text[:1200]}" for d in ctx]) if ctx else "(no matching docs)"
+            kb_text = (
+                "\n\n".join([f"### {d.title}\n{d.text[:1200]}" for d in ctx])
+                if ctx
+                else "(no matching docs)"
+            )
 
             # Enhanced code context
             code_ctx = build_code_context(
@@ -279,6 +309,7 @@ class RunPipeline:
                     patcher = OllamaWorkspacePatcher(ws)
                 elif patcher_used == "hf":
                     from app.services.patches import HuggingFaceWorkspacePatcher
+
                     patcher = HuggingFaceWorkspacePatcher(ws)
                 else:
                     patcher = WorkspacePatcher(ws)
@@ -294,8 +325,11 @@ class RunPipeline:
                 if patcher_used in {"ollama", "hf"}:
                     failed_mode = patcher_used
                     patcher_used = "rules"
-                    write_artifact("fallback", "fallback_used.txt",
-                                   f"{failed_mode} failed, falling back to rules patcher.\nerror={type(e).__name__}: {e}")
+                    write_artifact(
+                        "fallback",
+                        "fallback_used.txt",
+                        f"{failed_mode} failed, falling back to rules patcher.\nerror={type(e).__name__}: {e}",
+                    )
                     patcher = WorkspacePatcher(ws)
                     proposal = patcher.propose(
                         run.ticket_text,
@@ -309,10 +343,12 @@ class RunPipeline:
 
             assert proposal is not None
             diff_path = write_artifact("proposal_diff", "proposal.diff", proposal.diff)
-            rationale_path = write_artifact("proposal_rationale", "proposal.md",
-                                             f"# {proposal.title}\n\n{proposal.rationale}\n")
-            meta_path = self._store.write_json(str(run_id), "proposal.json",
-                                                {"patcher_mode": patcher_used, **proposal.__dict__})
+            rationale_path = write_artifact(
+                "proposal_rationale", "proposal.md", f"# {proposal.title}\n\n{proposal.rationale}\n"
+            )
+            meta_path = self._store.write_json(
+                str(run_id), "proposal.json", {"patcher_mode": patcher_used, **proposal.__dict__}
+            )
             self._artifacts.add(run_id, kind="proposal_json", path=meta_path)
 
             # Validate patch
@@ -321,7 +357,9 @@ class RunPipeline:
             if patcher_used in {"ollama", "hf"}:
                 rationale_lower = (proposal.rationale or "").lower()
                 # Catch all variants: "still fails git apply --check", "synthesized diff still fails", etc.
-                if "git apply --check" in rationale_lower and ("warning" in rationale_lower or "fails" in rationale_lower):
+                if "git apply --check" in rationale_lower and (
+                    "warning" in rationale_lower or "fails" in rationale_lower
+                ):
                     invalid = True
                     invalid_reason = proposal.rationale
             if proposal.diff.lstrip().startswith("@@"):
@@ -329,8 +367,9 @@ class RunPipeline:
                 invalid_reason = "Patch starts with '@@' (hunk fragment) — missing file headers."
 
             if invalid:
-                bad_path = write_artifact("invalid_patch", "invalid_patch.txt",
-                                           invalid_reason or "Invalid patch format.")
+                bad_path = write_artifact(
+                    "invalid_patch", "invalid_patch.txt", invalid_reason or "Invalid patch format."
+                )
                 self._steps.set_failed(
                     s.id,
                     error="Invalid patch. Click 'Regenerate Patch' to retry.",
@@ -339,10 +378,12 @@ class RunPipeline:
                 self._runs.set_status(run_id, "failed")
                 return UseCaseResult(ok=False, message="Invalid patch")
 
-            self._steps.set_success(s.id,
-                                     summary=f"Patch proposed via {patcher_used}",
-                                     artifact_path=rationale_path,
-                                     log_path=diff_path)
+            self._steps.set_success(
+                s.id,
+                summary=f"Patch proposed via {patcher_used}",
+                artifact_path=rationale_path,
+                log_path=diff_path,
+            )
 
         # ---- Step 7: Waiting for approval ----
         s = steps_by_name["Waiting for approval"]
@@ -352,7 +393,9 @@ class RunPipeline:
 
         if decision != "yes":
             if s.status != "waiting":
-                self._steps.set_waiting(s.id, summary="Approve or reject the proposed patch to continue.")
+                self._steps.set_waiting(
+                    s.id, summary="Approve or reject the proposed patch to continue."
+                )
             self._runs.set_status(run_id, "waiting_approval")
             if decision == "rejected":
                 self._steps.set_failed(s.id, error="Patch rejected by user")
@@ -373,8 +416,9 @@ class RunPipeline:
             run = self._runs.get(run_id)
             decision = (run.patch_approved or "no").lower() if run else "no"
             if decision != "yes":
-                self._steps.set_waiting(steps_by_name["Waiting for approval"].id,
-                                         summary="Approval required")
+                self._steps.set_waiting(
+                    steps_by_name["Waiting for approval"].id, summary="Approval required"
+                )
                 self._runs.set_status(run_id, "waiting_approval")
                 return UseCaseResult(ok=True, message="Waiting for approval")
 
@@ -393,6 +437,7 @@ class RunPipeline:
 
             patcher_mode = str(data.get("patcher_mode", effective_patcher)).strip().lower()
             from app.services.patches import HuggingFaceWorkspacePatcher
+
             if patcher_mode == "ollama":
                 patcher = OllamaWorkspacePatcher(ws)
             elif patcher_mode == "hf":
@@ -407,9 +452,11 @@ class RunPipeline:
             except Exception as e:
                 err = f"{type(e).__name__}: {e}"
                 err_path = write_artifact("apply_error", "apply_error.txt", err)
-                self._steps.set_failed(s.id,
-                                        error="Apply failed. Use 'Retry Apply' or 'Regenerate Patch'.",
-                                        log_path=err_path)
+                self._steps.set_failed(
+                    s.id,
+                    error="Apply failed. Use 'Retry Apply' or 'Regenerate Patch'.",
+                    log_path=err_path,
+                )
                 self._runs.set_status(run_id, "failed")
                 return UseCaseResult(ok=False, message="Apply failed")
 
@@ -428,23 +475,29 @@ class RunPipeline:
             # NOTE: "ERROR" alone is too broad — it matches log lines, DeprecationWarning, etc.
             # Use specific markers instead.
             import re as _re
+
             _has_failures_in_output = bool(
                 _re.search(r"\d+ failed", combined_output)
                 or "FAILED" in combined_output
                 or "AssertionError" in combined_output
-                or _re.search(r"^ERROR\b", combined_output, _re.MULTILINE)  # pytest ERROR collecting
+                or _re.search(
+                    r"^ERROR\b", combined_output, _re.MULTILINE
+                )  # pytest ERROR collecting
             )
             _checks_failed = (code != 0) or _has_failures_in_output
 
             if _checks_failed:
                 post_ok = False
-                self._steps.set_failed(s.id,
-                                        error="Post-checks still failing. Use 'Regenerate Patch'.",
-                                        log_path=log_path)
+                self._steps.set_failed(
+                    s.id,
+                    error="Post-checks still failing. Use 'Regenerate Patch'.",
+                    log_path=log_path,
+                )
                 self._runs.set_patch_decision(run_id, "no")
                 self._runs.set_status(run_id, "failed")
                 write_artifact(
-                    "next_actions", "next_actions.md",
+                    "next_actions",
+                    "next_actions.md",
                     "# Next actions\n\n"
                     "Post-checks failed after applying the patch.\n\n"
                     "Recommended actions:\n"
@@ -471,20 +524,40 @@ class RunPipeline:
                 post_log = self._store.run_dir(str(run_id)) / "post_checks.log"
                 if post_log.exists():
                     fail_out = post_log.read_text(encoding="utf-8", errors="replace")
-                    new_signals = bug_detector.from_output(fail_out, "", language=getattr(profile, "language", None))
-                    new_sig_text = "\n".join([f"- [{s.kind}] {s.summary}: {s.details}" for s in new_signals])
+                    new_signals = bug_detector.from_output(
+                        fail_out, "", language=getattr(profile, "language", None)
+                    )
+                    new_sig_text = "\n".join(
+                        [f"- [{s.kind}] {s.summary}: {s.details}" for s in new_signals]
+                    )
                 else:
                     new_sig_text = signals_text
 
                 # Carry over previous diff as context for the next patch
-                prev_diff = (self._store.run_dir(str(run_id)) / "proposal.diff").read_text(encoding="utf-8", errors="replace")                     if (self._store.run_dir(str(run_id)) / "proposal.diff").exists() else None
-                prev_err = (self._store.run_dir(str(run_id)) / "post_checks.log").read_text(encoding="utf-8", errors="replace")[:4000]                     if (self._store.run_dir(str(run_id)) / "post_checks.log").exists() else None
+                prev_diff = (
+                    (self._store.run_dir(str(run_id)) / "proposal.diff").read_text(
+                        encoding="utf-8", errors="replace"
+                    )
+                    if (self._store.run_dir(str(run_id)) / "proposal.diff").exists()
+                    else None
+                )
+                prev_err = (
+                    (self._store.run_dir(str(run_id)) / "post_checks.log").read_text(
+                        encoding="utf-8", errors="replace"
+                    )[:4000]
+                    if (self._store.run_dir(str(run_id)) / "post_checks.log").exists()
+                    else None
+                )
 
-                write_artifact("repair_attempt", f"repair_{_repair_iter}.txt",
-                               f"Auto-repair attempt {_repair_iter}/{max_iters}\n\nSignals:\n{new_sig_text}\n")
+                write_artifact(
+                    "repair_attempt",
+                    f"repair_{_repair_iter}.txt",
+                    f"Auto-repair attempt {_repair_iter}/{max_iters}\n\nSignals:\n{new_sig_text}\n",
+                )
 
                 # Reset workspace to base before re-proposing
                 from app.services.run_workspaces import reset_run_workspace
+
                 ws = reset_run_workspace(str(run_id), base_ws)
 
                 # Re-propose patch (use refreshed ws path)
@@ -492,6 +565,7 @@ class RunPipeline:
                     patcher = OllamaWorkspacePatcher(ws)
                 elif effective_patcher == "hf":
                     from app.services.patches import HuggingFaceWorkspacePatcher
+
                     patcher = HuggingFaceWorkspacePatcher(ws)
                 else:
                     patcher = WorkspacePatcher(ws)
@@ -505,20 +579,35 @@ class RunPipeline:
                         previous_error=prev_err,
                     )
                 except Exception as e_repair:
-                    write_artifact("repair_error", f"repair_{_repair_iter}_error.txt", f"{type(e_repair).__name__}: {e_repair}")
+                    write_artifact(
+                        "repair_error",
+                        f"repair_{_repair_iter}_error.txt",
+                        f"{type(e_repair).__name__}: {e_repair}",
+                    )
                     break
 
                 # Save new proposal
                 write_artifact("proposal_diff", "proposal.diff", new_proposal.diff)
-                write_artifact("proposal_rationale", "proposal.md", f"# {new_proposal.title}\n\n{new_proposal.rationale}\n")
-                self._store.write_json(str(run_id), "proposal.json",
-                                       {"patcher_mode": effective_patcher, **new_proposal.__dict__})
+                write_artifact(
+                    "proposal_rationale",
+                    "proposal.md",
+                    f"# {new_proposal.title}\n\n{new_proposal.rationale}\n",
+                )
+                self._store.write_json(
+                    str(run_id),
+                    "proposal.json",
+                    {"patcher_mode": effective_patcher, **new_proposal.__dict__},
+                )
 
                 # Re-apply
                 try:
                     patcher.apply(new_proposal)
                 except Exception as e_apply:
-                    write_artifact("repair_error", f"repair_{_repair_iter}_apply_error.txt", f"{type(e_apply).__name__}: {e_apply}")
+                    write_artifact(
+                        "repair_error",
+                        f"repair_{_repair_iter}_apply_error.txt",
+                        f"{type(e_apply).__name__}: {e_apply}",
+                    )
                     break
 
                 # Re-run checks
@@ -528,6 +617,7 @@ class RunPipeline:
                 write_artifact("post_checks_log", "post_checks.log", combined2)
 
                 import re as _re2
+
                 _still_failing = (code2 != 0) or bool(
                     _re2.search(r"\d+ failed", combined2)
                     or "FAILED" in combined2
@@ -536,8 +626,11 @@ class RunPipeline:
                 if not _still_failing:
                     post_ok = True
                     s_post = steps_by_name["Re-run checks"]
-                    self._steps.set_success(s_post.id, summary=f"All checks passed (after {_repair_iter} auto-repair(s))",
-                                             log_path=self._store.run_dir(str(run_id)) / "post_checks.log")
+                    self._steps.set_success(
+                        s_post.id,
+                        summary=f"All checks passed (after {_repair_iter} auto-repair(s))",
+                        log_path=self._store.run_dir(str(run_id)) / "post_checks.log",
+                    )
                     self._runs.set_status(run_id, "running")
                     break
 
@@ -570,11 +663,14 @@ class RunPipeline:
 
         final_ok = post_ok and smoke_ok
         self._runs.set_status(run_id, "completed" if final_ok else "failed")
-        return UseCaseResult(ok=final_ok, message="Completed" if final_ok else "Completed with failures")
+        return UseCaseResult(
+            ok=final_ok, message="Completed" if final_ok else "Completed with failures"
+        )
 
     def _ai_generate_plan(self, ticket_text: str, signals_text: str, ctx_text: str, profile) -> str:
         """Use Ollama to generate a structured plan."""
         from app.services.llm.ollama import OllamaClient
+
         try:
             client = OllamaClient(settings.ollama_base_url, timeout_seconds=120)
             prompt = (
@@ -592,7 +688,7 @@ class RunPipeline:
             )
             if resp.response.strip():
                 return f"# AI-Generated Plan\n\n{resp.response.strip()}\n"
-        except Exception as e:
+        except Exception:
             pass  # fall back to simple plan
         return self._simple_plan(ticket_text, signals_text, profile)
 
@@ -631,7 +727,8 @@ class RunPipeline:
             "",
             f"- **run_id**: `{run_id}`",
             f"- **workspace**: `{ws}`",
-            f"- **profile**: `{profile.name}`" + (" _(auto-detected)_" if getattr(profile, "auto_detected", False) else ""),
+            f"- **profile**: `{profile.name}`"
+            + (" _(auto-detected)_" if getattr(profile, "auto_detected", False) else ""),
             f"- **generated_at**: {datetime.utcnow().isoformat()}Z",
             "",
             "## Outcome",
@@ -642,8 +739,13 @@ class RunPipeline:
             "## Steps",
         ]
         for s in steps:
-            status_icon = {"success": "✅", "failed": "❌", "skipped": "⏭️", "waiting": "⏳"}.get(s.status, "•")
-            lines.append(f"- {s.order}. **{s.name}** {status_icon} `{s.status}`" + (f" — {s.summary}" if s.summary else ""))
+            status_icon = {"success": "✅", "failed": "❌", "skipped": "⏭️", "waiting": "⏳"}.get(
+                s.status, "•"
+            )
+            lines.append(
+                f"- {s.order}. **{s.name}** {status_icon} `{s.status}`"
+                + (f" — {s.summary}" if s.summary else "")
+            )
             if s.error:
                 lines.append(f"  - ⚠️ error: {s.error}")
             if s.log_path:

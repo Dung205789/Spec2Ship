@@ -1,7 +1,7 @@
 """init
 
 Revision ID: 0001_init
-Revises: 
+Revises:
 Create Date: 2026-02-22
 
 """
