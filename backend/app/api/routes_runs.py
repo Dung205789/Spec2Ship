@@ -207,7 +207,7 @@ def regenerate_patch(
 @router.post("/{run_id}/switch_patcher")
 def switch_patcher(
     run_id: UUID,
-    mode: str = Query(..., pattern="^(rules|ollama|hf)$"),
+    mode: str = Query(..., pattern="^(rules|ollama|hf|openai)$"),
     db: Session = Depends(get_db),
 ) -> dict:
     runs = RunRepository(db)

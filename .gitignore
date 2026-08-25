@@ -40,6 +40,7 @@ data/run_workspaces/*
 !data/**/.gitkeep
 artifacts/
 workspace/
+eval/_work/
 
 # ───────────────────────────── ML caches ────────────────────────────
 ml/.cache/

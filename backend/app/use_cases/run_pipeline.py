@@ -18,7 +18,7 @@ from app.services.directives import parse_spec2ship_directives
 from app.services.fs import FileStore
 from app.services.kb import KnowledgeBase
 from app.services.code_context import build_code_context
-from app.services.patches import OllamaWorkspacePatcher, PatchProposal, WorkspacePatcher
+from app.services.patches import OllamaWorkspacePatcher, OpenAIWorkspacePatcher, PatchProposal, WorkspacePatcher
 from app.services.run_overrides import load_run_overrides
 from app.services.run_workspaces import ensure_run_workspace
 from app.services.workspace_profile import load_workspace_profile
@@ -272,9 +272,11 @@ class RunPipeline:
             self._steps.set_running(s.id)
             ensure_not_canceled()
 
-            # Use AI to generate plan if Ollama is available
+            # Use AI to generate plan if an LLM backend is configured
             if effective_patcher == "ollama":
                 plan_text = self._ai_generate_plan(run.ticket_text, signals_text, ctx_text, profile)
+            elif effective_patcher == "openai":
+                plan_text = self._ai_generate_plan_openai(run.ticket_text, signals_text, ctx_text, profile)
             else:
                 plan_text = self._simple_plan(run.ticket_text, signals_text, profile)
 
@@ -307,6 +309,8 @@ class RunPipeline:
             try:
                 if patcher_used == "ollama":
                     patcher = OllamaWorkspacePatcher(ws)
+                elif patcher_used == "openai":
+                    patcher = OpenAIWorkspacePatcher(ws)
                 elif patcher_used == "hf":
                     from app.services.patches import HuggingFaceWorkspacePatcher
 
@@ -322,7 +326,7 @@ class RunPipeline:
                     previous_error=previous_error,
                 )
             except Exception as e:
-                if patcher_used in {"ollama", "hf"}:
+                if patcher_used in {"ollama", "hf", "openai"}:
                     failed_mode = patcher_used
                     patcher_used = "rules"
                     write_artifact(
@@ -354,7 +358,7 @@ class RunPipeline:
             # Validate patch
             invalid = False
             invalid_reason = ""
-            if patcher_used in {"ollama", "hf"}:
+            if patcher_used in {"ollama", "hf", "openai"}:
                 rationale_lower = (proposal.rationale or "").lower()
                 # Catch all variants: "still fails git apply --check", "synthesized diff still fails", etc.
                 if "git apply --check" in rationale_lower and (
@@ -440,6 +444,8 @@ class RunPipeline:
 
             if patcher_mode == "ollama":
                 patcher = OllamaWorkspacePatcher(ws)
+            elif patcher_mode == "openai":
+                patcher = OpenAIWorkspacePatcher(ws)
             elif patcher_mode == "hf":
                 patcher = HuggingFaceWorkspacePatcher(ws)
             else:
@@ -563,6 +569,8 @@ class RunPipeline:
                 # Re-propose patch (use refreshed ws path)
                 if effective_patcher == "ollama":
                     patcher = OllamaWorkspacePatcher(ws)
+                elif effective_patcher == "openai":
+                    patcher = OpenAIWorkspacePatcher(ws)
                 elif effective_patcher == "hf":
                     from app.services.patches import HuggingFaceWorkspacePatcher
 
@@ -685,6 +693,32 @@ class RunPipeline:
                 model=settings.ollama_model,
                 prompt=prompt,
                 options={"temperature": 0.1, "num_ctx": 4096},
+            )
+            if resp.response.strip():
+                return f"# AI-Generated Plan\n\n{resp.response.strip()}\n"
+        except Exception:
+            pass  # fall back to simple plan
+        return self._simple_plan(ticket_text, signals_text, profile)
+
+    def _ai_generate_plan_openai(self, ticket_text: str, signals_text: str, ctx_text: str, profile) -> str:
+        """Use OpenAI to generate a structured plan (mirrors _ai_generate_plan)."""
+        from app.services.llm.openai_client import OpenAIClient
+
+        try:
+            client = OpenAIClient(settings.openai_api_key, timeout_seconds=settings.openai_timeout_seconds)
+            prompt = (
+                "You are a senior software engineer. Create a concise fix plan.\n\n"
+                f"TICKET:\n{ticket_text}\n\n"
+                f"FAILING SIGNALS:\n{signals_text}\n\n"
+                f"REPO CONTEXT (snippets):\n{ctx_text[:3000]}\n\n"
+                "Return a short markdown plan with sections: ## Root Cause, ## Fix Strategy, ## Files to Change\n"
+                "Be specific about which functions/lines need changing. Max 400 words."
+            )
+            resp = client.generate(
+                model=settings.openai_model,
+                prompt=prompt,
+                json_mode=False,
+                options={"temperature": 0.1},
             )
             if resp.response.strip():
                 return f"# AI-Generated Plan\n\n{resp.response.strip()}\n"

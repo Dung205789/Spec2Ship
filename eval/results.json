@@ -1,0 +1,104 @@
+[
+  {
+    "mode": "rules",
+    "case": "discount-rounding-bug",
+    "proposed_change": true,
+    "apply_ok": true,
+    "apply_error": null,
+    "latency_s": 1.4,
+    "tests_pass": true,
+    "half_up_correct": true,
+    "probe_detail": [
+      {
+        "cents": 1789,
+        "pct": 50,
+        "expected": 895,
+        "got": 895,
+        "ok": true
+      },
+      {
+        "cents": 1791,
+        "pct": 50,
+        "expected": 896,
+        "got": 896,
+        "ok": true
+      },
+      {
+        "cents": 2683,
+        "pct": 50,
+        "expected": 1342,
+        "got": 1342,
+        "ok": true
+      },
+      {
+        "cents": 2681,
+        "pct": 50,
+        "expected": 1341,
+        "got": 1341,
+        "ok": true
+      }
+    ],
+    "test_log_tail": ""
+  },
+  {
+    "mode": "rules",
+    "case": "add-health-endpoint",
+    "proposed_change": true,
+    "apply_ok": true,
+    "apply_error": null,
+    "latency_s": 0.03,
+    "health_ok": true,
+    "health_log_tail": ""
+  },
+  {
+    "mode": "openai",
+    "case": "discount-rounding-bug",
+    "proposed_change": true,
+    "apply_ok": true,
+    "apply_error": null,
+    "latency_s": 23.96,
+    "tests_pass": true,
+    "half_up_correct": true,
+    "probe_detail": [
+      {
+        "cents": 1789,
+        "pct": 50,
+        "expected": 895,
+        "got": 895,
+        "ok": true
+      },
+      {
+        "cents": 1791,
+        "pct": 50,
+        "expected": 896,
+        "got": 896,
+        "ok": true
+      },
+      {
+        "cents": 2683,
+        "pct": 50,
+        "expected": 1342,
+        "got": 1342,
+        "ok": true
+      },
+      {
+        "cents": 2681,
+        "pct": 50,
+        "expected": 1341,
+        "got": 1341,
+        "ok": true
+      }
+    ],
+    "test_log_tail": ""
+  },
+  {
+    "mode": "openai",
+    "case": "add-health-endpoint",
+    "proposed_change": true,
+    "apply_ok": true,
+    "apply_error": null,
+    "latency_s": 13.02,
+    "health_ok": true,
+    "health_log_tail": ""
+  }
+]

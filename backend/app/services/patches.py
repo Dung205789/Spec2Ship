@@ -9,6 +9,7 @@ from app.services.code_context import build_code_context
 from app.services.commands import CommandRunner
 from app.services.diffing import snapshot_files, unified_diff
 from app.services.llm.ollama import OllamaClient
+from app.services.llm.openai_client import OpenAIClient
 
 
 @dataclass(frozen=True)
@@ -382,7 +383,15 @@ class OllamaWorkspacePatcher:
             "- Use paths relative to repo root.\n"
             "- CRITICAL: For existing files, the diff MUST include `-` lines (lines being removed) and `+` lines (new content).\n"
             "  Do NOT use `@@ -0,0 +1,N @@` for an existing file — this would APPEND content instead of replacing it.\n"
-            "  Always show what you are removing with `-` lines and what you are adding with `+` lines.\n\n"
+            "  Always show what you are removing with `-` lines and what you are adding with `+` lines.\n"
+            "- If the ticket specifies exact numeric/rounding semantics (e.g. \"round half-up\"), implement "
+            "them precisely and verify against every example value given — do not substitute a "
+            "similar-looking built-in. In particular, Python's built-in `round()` is round-half-to-even, "
+            "NOT round-half-up; for true half-up rounding of money, use "
+            "`decimal.Decimal(...).quantize(Decimal('1'), rounding=decimal.ROUND_HALF_UP)`.\n"
+            "- Before finalizing, re-check your own diff: every name you reference (Decimal, "
+            "ROUND_HALF_UP, or anything else) must have a corresponding `+import` line in the same diff, "
+            "or already exist in the unmodified part of the file.\n\n"
             "=== TICKET ===\n"
             f"{ticket_text}\n\n"
             "=== SIGNALS ===\n"
@@ -694,6 +703,330 @@ class OllamaWorkspacePatcher:
 
     def _git_apply_check(self, diff_text: str) -> tuple[bool, str]:
         """Run `git apply --check` and return (ok, combined_error)."""
+        t = _sanitize_unified_diff(_strip_patch_wrappers(diff_text))
+        if not t or t.strip() in {"(no changes)", "(no-op)", "no changes"}:
+            return True, ""
+        p = self._root / ".spec2ship_check.diff"
+        p.write_text(t, encoding="utf-8")
+        check = self._cmd.run(["git", "apply", "--check", str(p)])
+        if check.code == 0:
+            return True, ""
+        combined = (check.stdout or "") + "\n" + (check.stderr or "")
+        return False, combined.strip()
+
+
+class OpenAIWorkspacePatcher:
+    """LLM-backed patch proposer and applier using the OpenAI API.
+
+    Mirrors OllamaWorkspacePatcher's interface and retry/repair flow exactly
+    (propose -> validate with `git apply --check` -> ask for a corrected diff
+    once -> fall back to full-file synthesis) so the two backends are directly
+    comparable in eval, and swapping between them is a one-line config change.
+    """
+
+    def __init__(self, workspace_path: str) -> None:
+        self._root = Path(workspace_path)
+        self._cmd = CommandRunner(
+            cwd=str(self._root),
+            timeout_seconds=getattr(settings, "apply_patch_seconds", None)
+            or settings.git_command_seconds
+            or settings.max_command_seconds,
+        )
+        self._openai = OpenAIClient(
+            settings.openai_api_key, timeout_seconds=settings.openai_timeout_seconds
+        )
+
+    def propose(
+        self,
+        ticket_text: str,
+        signals_text: str,
+        context_text: str | None = None,
+        previous_diff: str | None = None,
+        previous_error: str | None = None,
+    ) -> PatchProposal:
+        context = context_text or build_code_context(
+            str(self._root),
+            ticket_text=ticket_text,
+            signals_text=signals_text,
+            max_files=settings.code_context_max_files,
+            max_chars=settings.code_context_max_chars,
+        )
+
+        prompt = (
+            "You are a senior software engineer. You will be given:\n"
+            "(1) a ticket describing a bug or feature\n"
+            "(2) tool signals (tests/lint output)\n"
+            "(3) best-effort repo context snippets\n\n"
+            "Your job: propose a *single* patch that can be applied with `git apply`.\n"
+            "Rules:\n"
+            "- Return ONLY a JSON object with keys: title, rationale, diff. No extra keys. No markdown.\n"
+            "- The `diff` must be a valid unified diff with file headers: `diff --git a/... b/...`, and `---` / `+++`.\n"
+            "- Use paths relative to repo root.\n"
+            "- CRITICAL: For existing files, the diff MUST include `-` lines (lines being removed) and `+` lines (new content).\n"
+            "  Do NOT use `@@ -0,0 +1,N @@` for an existing file — this would APPEND content instead of replacing it.\n"
+            "  Always show what you are removing with `-` lines and what you are adding with `+` lines.\n"
+            "- If the ticket specifies exact numeric/rounding semantics (e.g. \"round half-up\"), implement "
+            "them precisely and verify against every example value given — do not substitute a "
+            "similar-looking built-in. In particular, Python's built-in `round()` is round-half-to-even, "
+            "NOT round-half-up; for true half-up rounding of money, use "
+            "`decimal.Decimal(...).quantize(Decimal('1'), rounding=decimal.ROUND_HALF_UP)`.\n"
+            "- Before finalizing, re-check your own diff: every name you reference (Decimal, "
+            "ROUND_HALF_UP, or anything else) must have a corresponding `+import` line in the same diff, "
+            "or already exist in the unmodified part of the file.\n\n"
+            "=== TICKET ===\n"
+            f"{ticket_text}\n\n"
+            "=== SIGNALS ===\n"
+            f"{signals_text}\n\n"
+            "=== REPO CONTEXT (snippets) ===\n"
+            f"{context}\n"
+        )
+
+        if previous_error or previous_diff:
+            prompt += (
+                "\n\n=== PREVIOUS ATTEMPT (for repair) ===\n"
+                + (f"error:\n{previous_error}\n\n" if previous_error else "")
+                + (f"diff:\n{previous_diff}\n" if previous_diff else "")
+            )
+
+        options = {"temperature": settings.openai_temperature}
+
+        self._ensure_git_repo()
+
+        def _call_llm(extra_prompt: str | None = None) -> PatchProposal:
+            p = prompt
+            if extra_prompt:
+                p = p + "\n\n=== IMPORTANT (fix formatting) ===\n" + extra_prompt + "\n"
+            resp = self._openai.generate(
+                model=settings.openai_model,
+                prompt=p,
+                options=options,
+            )
+            data = OpenAIClient.try_parse_json(resp.response)
+            if data:
+                title = str(data.get("title", "LLM proposal")).strip() or "LLM proposal"
+                rationale = str(data.get("rationale", "")).strip()
+                diff = _sanitize_unified_diff(
+                    _strip_patch_wrappers(str(data.get("diff", "")).strip())
+                )
+                if not diff:
+                    diff = "(no changes)"
+                return PatchProposal(title=title, rationale=rationale, diff=diff)
+            return PatchProposal(
+                title="LLM proposal (unparsed)",
+                rationale="OpenAI did not return valid JSON; using raw output as diff.",
+                diff=_sanitize_unified_diff(_strip_patch_wrappers(resp.response)) or "(no changes)",
+            )
+
+        def _call_llm_files(extra_prompt: str | None = None) -> PatchProposal | None:
+            """Ask the model for full file contents and synthesize a diff locally (robust fallback)."""
+            p = prompt
+            if extra_prompt:
+                p = p + "\n\n=== IMPORTANT (fallback to file edits) ===\n" + extra_prompt + "\n"
+            p = (
+                p
+                + "\n\nReturn a JSON object with keys: title, rationale, files.\n"
+                + "DO NOT return a diff. Instead, return full new contents for each changed file in "
+                + "`files` (keys are repo-relative paths). Only include files you change. No markdown.\n"
+            )
+
+            resp = self._openai.generate(model=settings.openai_model, prompt=p, options=options)
+            data = OpenAIClient.try_parse_json(resp.response) or {}
+            files = data.get("files")
+            if not isinstance(files, dict) or not files:
+                return None
+
+            before: dict[str, str] = {}
+            after: dict[str, str] = {}
+            for k, v in files.items():
+                rel = str(k).strip()
+                if rel.startswith("a/") or rel.startswith("b/"):
+                    rel = rel[2:]
+                rel = rel.lstrip("/")
+                if not rel or ".." in rel or rel.startswith(".git") or rel.startswith("/"):
+                    continue
+                fp = self._root / rel
+                before[rel] = fp.read_text(encoding="utf-8") if fp.exists() else ""
+                after[rel] = str(v)
+
+            if not after:
+                return None
+
+            diff = unified_diff(before, after)
+            prop = PatchProposal(
+                title=str(data.get("title") or "LLM proposal").strip() or "LLM proposal",
+                rationale=str(data.get("rationale") or "").strip(),
+                diff=diff,
+            )
+            ok, err = self._git_apply_check(prop.diff)
+            if ok:
+                return prop
+            return PatchProposal(
+                title=prop.title,
+                rationale=(
+                    prop.rationale
+                    + "\n\n[Warning] Synthesized diff still fails git apply --check.\n"
+                    + err
+                ).strip(),
+                diff=prop.diff,
+            )
+
+        def _validate_or_repair(prop: PatchProposal) -> tuple[PatchProposal, bool, str]:
+            if not prop.diff or prop.diff.strip() in {"(no changes)", "(no-op)", "no changes"}:
+                return prop, True, ""
+            ok, err = self._git_apply_check(prop.diff)
+            if ok:
+                return prop, True, ""
+            extra = (
+                "Your `diff` was rejected by `git apply --check` in the target repo. "
+                "Return a corrected unified diff that includes file headers (`diff --git`, `---`, `+++`) "
+                "and correct relative paths. Do not include explanations or markdown.\n\n"
+                f"git apply --check error:\n{err}\n\n"
+                "Here is your previous diff (rewrite it into a valid git patch):\n" + prop.diff
+            )
+            repaired = _call_llm(extra_prompt=extra)
+            ok2, err2 = self._git_apply_check(repaired.diff)
+            if ok2:
+                return repaired, True, ""
+            repaired2 = PatchProposal(
+                title=repaired.title or prop.title,
+                rationale=(
+                    repaired.rationale
+                    + "\n\n[Warning] Patch still fails git apply --check.\n"
+                    + err2
+                ).strip(),
+                diff=repaired.diff,
+            )
+            return repaired2, False, err2
+
+        max_attempts = max(1, int(getattr(settings, "patch_max_attempts", 1)))
+        last_err = ""
+        proposal: PatchProposal | None = None
+
+        for attempt in range(1, max_attempts + 1):
+            extra = None
+            if attempt > 1:
+                extra = (
+                    f"This is attempt {attempt}/{max_attempts}. The previous patch was invalid. "
+                    "Fix the diff so that `git apply --check` passes.\n\n"
+                    f"previous_error:\n{last_err}\n"
+                    + (f"\nprevious_diff:\n{proposal.diff}\n" if proposal else "")
+                )
+            proposal0 = _call_llm(extra_prompt=extra)
+            proposal, ok, last_err = _validate_or_repair(proposal0)
+            if ok:
+                return proposal
+
+        fallback_extra = (
+            "All previous attempts failed `git apply --check`. "
+            "Return full new file contents instead of a diff. "
+            "Prefer minimal edits that fix the failing tests."
+            + (f"\n\nlast_error:\n{last_err}\n" if last_err else "")
+        )
+        fallback = _call_llm_files(extra_prompt=fallback_extra)
+        if fallback:
+            okf, errf = self._git_apply_check(fallback.diff)
+            if okf:
+                return fallback
+
+        if proposal:
+            return PatchProposal(
+                title=proposal.title,
+                rationale=(
+                    proposal.rationale
+                    + f"\n\n[Warning] Patch still fails git apply --check after {max_attempts} attempts.\n{last_err}"
+                ).strip(),
+                diff=proposal.diff,
+            )
+        return _call_llm()
+
+    # ---- shared with OllamaWorkspacePatcher (kept local, same as that class,
+    # to avoid a wider refactor of a working pattern used identically by all
+    # three LLM-backed patchers in this file) ----
+
+    def _is_add_only_patch(self, diff_text: str) -> bool:
+        for m in re.finditer(r"^\+\+\+\s+b/(.+)", diff_text, flags=re.MULTILINE):
+            rel = m.group(1).strip()
+            if (self._root / rel).exists():
+                if re.search(r"^@@ -0,0 \+", diff_text, flags=re.MULTILINE):
+                    return True
+        return False
+
+    def _apply_add_only_patch_as_file_replace(self, diff_text: str) -> None:
+        file_sections = re.split(r"^(?=diff --git |--- a/)", diff_text, flags=re.MULTILINE)
+        for section in file_sections:
+            if not section.strip():
+                continue
+            m_plus = re.search(r"^\+\+\+\s+b/(.+)", section, flags=re.MULTILINE)
+            if not m_plus:
+                m_plus = re.search(r"^\+\+\+\s+(.+)", section, flags=re.MULTILINE)
+            if not m_plus:
+                continue
+            rel = m_plus.group(1).strip()
+            if rel in {"/dev/null", "dev/null"}:
+                continue
+            fp = self._root / rel
+            if not re.search(r"^@@ -0,0 \+", section, flags=re.MULTILINE):
+                continue
+            added_lines = []
+            in_hunk = False
+            for line in section.splitlines(keepends=True):
+                if line.startswith("@@"):
+                    in_hunk = True
+                    continue
+                if in_hunk and line.startswith("+"):
+                    added_lines.append(line[1:])
+            if added_lines:
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text("".join(added_lines), encoding="utf-8")
+
+    def apply(self, proposal: PatchProposal) -> str:
+        diff_text = _sanitize_unified_diff(_strip_patch_wrappers(proposal.diff))
+        if not diff_text or diff_text.strip() in {"(no changes)", "(no-op)", "no changes"}:
+            return proposal.title
+
+        self._ensure_git_repo()
+
+        if not _looks_like_unified_diff(diff_text):
+            raise RuntimeError(
+                "Patch is not a valid unified diff (missing file headers). "
+                "Ask the model to output a full `git diff` style patch with diff --git/---/+++ lines."
+            )
+
+        if self._is_add_only_patch(diff_text):
+            self._apply_add_only_patch_as_file_replace(diff_text)
+            return proposal.title
+
+        patch_path = self._root / ".spec2ship_patch.diff"
+        patch_path.write_text(diff_text, encoding="utf-8")
+
+        check = self._cmd.run(["git", "apply", "--check", str(patch_path)])
+        if check.code != 0:
+            raise RuntimeError(
+                "Patch failed `git apply --check`.\n"
+                f"stdout:\n{check.stdout}\n\n"
+                f"stderr:\n{check.stderr}\n"
+            )
+
+        res = self._cmd.run(["git", "apply", "--whitespace=nowarn", str(patch_path)])
+        if res.code != 0:
+            raise RuntimeError(
+                f"Patch failed `git apply`.\nstdout:\n{res.stdout}\n\nstderr:\n{res.stderr}\n"
+            )
+
+        return proposal.title
+
+    def _ensure_git_repo(self) -> None:
+        if (self._root / ".git").exists():
+            return
+        res = self._cmd.run(["git", "init"])
+        if res.code != 0:
+            raise RuntimeError(f"Failed to init git repo for patch apply: {res.stderr}")
+        self._cmd.run(["git", "config", "user.email", "spec2ship@local"])
+        self._cmd.run(["git", "config", "user.name", "spec2ship"])
+        self._cmd.run(["git", "add", "-A"])
+        self._cmd.run(["git", "commit", "-m", "init", "--allow-empty"])
+
+    def _git_apply_check(self, diff_text: str) -> tuple[bool, str]:
         t = _sanitize_unified_diff(_strip_patch_wrappers(diff_text))
         if not t or t.strip() in {"(no changes)", "(no-op)", "no changes"}:
             return True, ""

@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     git_command_seconds: int = 120  # server: 600
     test_command_seconds: int = 300  # server: 1800
 
-    # Patch proposer: "rules" | "ollama" | "hf"
+    # Patch proposer: "rules" | "ollama" | "hf" | "openai"
     patcher_mode: str = "rules"
 
     # Patch robustness
@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     ollama_timeout_seconds: int = 300  # low for local; server: 600+
     ollama_temperature: float = 0.15
     ollama_num_ctx: int = 4096  # low for local; server: 8192+
+
+    # OpenAI (hosted patcher backend — no local GPU/model download needed)
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+    openai_timeout_seconds: int = 120
+    openai_temperature: float = 0.15
 
     # HuggingFace local patcher
     hf_model: str = "Qwen/Qwen2.5-Coder-0.5B-Instruct"
