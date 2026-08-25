@@ -49,7 +49,7 @@ It is built around three ideas that matter for production agents:
 |---|---|---|
 | 🤖 | **Agentic pipeline** | 11-stage loop: preflight → baseline → summarize → context retrieval → plan → propose → **approve** → apply → re-check → smoke → report |
 | 🧑‍⚖️ | **Human-in-the-loop gate** | Runs block on `Waiting for approval`; a reviewer approves/rejects the diff before anything is applied |
-| 🔌 | **Pluggable patch backends** | `rules` (offline, deterministic), `ollama` (local LLM, e.g. `qwen2.5-coder`), or `hf` (local Transformers + optional LoRA) |
+| 🔌 | **Pluggable patch backends** | `rules` (offline, deterministic), `openai` (hosted API, no GPU/Docker profile needed), `ollama` (local LLM, e.g. `qwen2.5-coder`), or `hf` (local Transformers + optional LoRA) |
 | 🧠 | **Context retrieval (RAG-lite)** | BM25 over the workspace docs/code to ground the patch prompt — no heavyweight vector DB required |
 | 🌐 | **Multi-language signal parsing** | Structured failure extraction for Python/pytest, JS/TS (Jest/Vitest), Go, and Rust |
 | 🔒 | **Sandboxed workspaces** | Each run operates on an isolated copy with zip-bomb / path-traversal guards and per-command timeouts |
@@ -155,7 +155,7 @@ artifact you can inspect:
 | 3 | **Summarize issues** | Parse tool output into structured `BugSignal`s | `signals.txt` |
 | 4 | **Context search** | BM25-retrieve the most relevant files/docs | `context.md` |
 | 5 | **Plan** | Draft an approach from the ticket + signals + context | `plan.md` |
-| 6 | **Propose patch** | Generate a unified diff (`rules` / `ollama` / `hf`) | `proposal.diff` |
+| 6 | **Propose patch** | Generate a unified diff (`rules` / `openai` / `ollama` / `hf`) | `proposal.diff` |
 | 7 | **Waiting for approval** | ⏸️ Block until a human approves or rejects | — |
 | 8 | **Apply patch** | `git apply` the approved diff to the isolated copy | `apply_result.txt` |
 | 9 | **Re-run checks** | Re-execute the suite to confirm the fix | `post_checks.log` |
@@ -215,7 +215,8 @@ loaded via Pydantic Settings. Highlights:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `PATCHER_MODE` | Patch backend: `rules` / `ollama` / `hf` | `rules` |
+| `PATCHER_MODE` | Patch backend: `rules` / `openai` / `ollama` / `hf` | `rules` |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | Hosted-API patch generation (only if `PATCHER_MODE=openai`) | — / `gpt-4o-mini` |
 | `OLLAMA_MODEL` | Local model for patch generation | `qwen2.5-coder:7b` |
 | `ISOLATE_WORKSPACES` | Run each job on an isolated copy | `true` |
 | `WORKSPACE_UPLOAD_MAX_BYTES` | Upload-size guard (zip-bomb defense) | 200 MB |
@@ -248,7 +249,7 @@ A few decisions worth calling out (and the reasoning behind them):
 - [ ] Richer retrieval (AST-aware chunking, optional embeddings)
 - [ ] Multi-file, dependency-aware patch planning
 - [ ] Eval dashboard for SWE-bench resolve-rate over time
-- [ ] Pluggable cloud LLM providers behind the existing patcher interface
+- [x] Pluggable cloud LLM providers behind the existing patcher interface (`PATCHER_MODE=openai`; see `eval/report.md` for a real rules-vs-openai comparison)
 
 ---
 
