@@ -18,7 +18,12 @@ from app.services.directives import parse_spec2ship_directives
 from app.services.fs import FileStore
 from app.services.kb import KnowledgeBase
 from app.services.code_context import build_code_context
-from app.services.patches import OllamaWorkspacePatcher, OpenAIWorkspacePatcher, PatchProposal, WorkspacePatcher
+from app.services.patches import (
+    OllamaWorkspacePatcher,
+    OpenAIWorkspacePatcher,
+    PatchProposal,
+    WorkspacePatcher,
+)
 from app.services.run_overrides import load_run_overrides
 from app.services.run_workspaces import ensure_run_workspace
 from app.services.workspace_profile import load_workspace_profile
@@ -276,7 +281,9 @@ class RunPipeline:
             if effective_patcher == "ollama":
                 plan_text = self._ai_generate_plan(run.ticket_text, signals_text, ctx_text, profile)
             elif effective_patcher == "openai":
-                plan_text = self._ai_generate_plan_openai(run.ticket_text, signals_text, ctx_text, profile)
+                plan_text = self._ai_generate_plan_openai(
+                    run.ticket_text, signals_text, ctx_text, profile
+                )
             else:
                 plan_text = self._simple_plan(run.ticket_text, signals_text, profile)
 
@@ -700,12 +707,16 @@ class RunPipeline:
             pass  # fall back to simple plan
         return self._simple_plan(ticket_text, signals_text, profile)
 
-    def _ai_generate_plan_openai(self, ticket_text: str, signals_text: str, ctx_text: str, profile) -> str:
+    def _ai_generate_plan_openai(
+        self, ticket_text: str, signals_text: str, ctx_text: str, profile
+    ) -> str:
         """Use OpenAI to generate a structured plan (mirrors _ai_generate_plan)."""
         from app.services.llm.openai_client import OpenAIClient
 
         try:
-            client = OpenAIClient(settings.openai_api_key, timeout_seconds=settings.openai_timeout_seconds)
+            client = OpenAIClient(
+                settings.openai_api_key, timeout_seconds=settings.openai_timeout_seconds
+            )
             prompt = (
                 "You are a senior software engineer. Create a concise fix plan.\n\n"
                 f"TICKET:\n{ticket_text}\n\n"

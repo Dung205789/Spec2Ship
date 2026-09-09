@@ -27,7 +27,9 @@ class FakeOpenAIClient:
         return OpenAIResponse(response=self._responses.pop(0), model=model)
 
 
-def _make_patcher(tmp_path, responses: list[str]) -> tuple[OpenAIWorkspacePatcher, FakeOpenAIClient]:
+def _make_patcher(
+    tmp_path, responses: list[str]
+) -> tuple[OpenAIWorkspacePatcher, FakeOpenAIClient]:
     patcher = OpenAIWorkspacePatcher(str(tmp_path))
     fake = FakeOpenAIClient(responses)
     patcher._openai = fake  # type: ignore[attr-defined]  # swap the real SDK client for the fake

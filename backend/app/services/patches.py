@@ -384,7 +384,7 @@ class OllamaWorkspacePatcher:
             "- CRITICAL: For existing files, the diff MUST include `-` lines (lines being removed) and `+` lines (new content).\n"
             "  Do NOT use `@@ -0,0 +1,N @@` for an existing file — this would APPEND content instead of replacing it.\n"
             "  Always show what you are removing with `-` lines and what you are adding with `+` lines.\n"
-            "- If the ticket specifies exact numeric/rounding semantics (e.g. \"round half-up\"), implement "
+            '- If the ticket specifies exact numeric/rounding semantics (e.g. "round half-up"), implement '
             "them precisely and verify against every example value given — do not substitute a "
             "similar-looking built-in. In particular, Python's built-in `round()` is round-half-to-even, "
             "NOT round-half-up; for true half-up rounding of money, use "
@@ -765,7 +765,7 @@ class OpenAIWorkspacePatcher:
             "- CRITICAL: For existing files, the diff MUST include `-` lines (lines being removed) and `+` lines (new content).\n"
             "  Do NOT use `@@ -0,0 +1,N @@` for an existing file — this would APPEND content instead of replacing it.\n"
             "  Always show what you are removing with `-` lines and what you are adding with `+` lines.\n"
-            "- If the ticket specifies exact numeric/rounding semantics (e.g. \"round half-up\"), implement "
+            '- If the ticket specifies exact numeric/rounding semantics (e.g. "round half-up"), implement '
             "them precisely and verify against every example value given — do not substitute a "
             "similar-looking built-in. In particular, Python's built-in `round()` is round-half-to-even, "
             "NOT round-half-up; for true half-up rounding of money, use "
