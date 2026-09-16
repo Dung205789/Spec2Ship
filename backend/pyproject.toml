@@ -39,7 +39,7 @@ prod = [
 # Training + HuggingFace local inference (LoRA/PEFT)
 train = [
   "torch>=2.2,<3",
-  "transformers>=4.40,<5",
+  "transformers>=4.40,<6",
   "peft>=0.11,<1",
   "accelerate>=0.29,<1",
   "sentencepiece>=0.2,<1",
