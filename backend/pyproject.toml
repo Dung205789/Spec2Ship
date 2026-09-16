@@ -13,7 +13,7 @@ dependencies = [
   "SQLAlchemy==2.0.36",
   "psycopg2-binary==2.9.9",
   "alembic==1.14.0",
-  "python-dotenv==1.0.1",
+  "python-dotenv==1.2.3",
   "redis==5.2.0",
   "rq==1.16.2",
   "rank-bm25==0.2.2",
