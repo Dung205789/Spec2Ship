@@ -24,11 +24,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "pytest==8.3.3",
+  "pytest==9.1.1",
   "ruff==0.7.4",
 ]
 prod = [
-  "pytest==8.3.3",
+  "pytest==9.1.1",
   # ML / evaluation (SWE-bench harness)
   # NOTE: heavy by design; used by the RQ worker when running dataset evaluations.
   "datasets>=2.18,<3",
